@@ -11572,9 +11572,10 @@ function update(timestamp = 0) {
   // Enemy frictionı da aynı önbellekten alır — frame başında tek hesap.
   const _eFricFrame = _fricFrame;
 
-  // Rebuild spatial grid every 8 frames instead of every frame (8x CPU savings).
-  // Buildings rarely change mid-frame — throttle is imperceptible to players.
-  if (++_sgRebuildTimer >= 8) { _sgRebuildTimer = 0; _sgRebuild(); }
+  // Rebuild spatial grid at a relaxed cadence when the scene is busy.
+  // Large build-heavy bases would otherwise spend a lot of CPU on every 8th frame.
+  const _sgInterval = buildings.length > 60 ? 18 : 8;
+  if (++_sgRebuildTimer >= _sgInterval) { _sgRebuildTimer = 0; _sgRebuild(); }
 
   // Enemies
   for (let i = enemies.length - 1; i >= 0; i--) {
@@ -13058,20 +13059,27 @@ function _isOwnBuilding(b) {
   return b._ownerId === _mySocketId;
 }
 
+function _screenToWorld(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  const sx = ((clientX - rect.left) / rect.width) * canvas.width;
+  const sy = ((clientY - rect.top) / rect.height) * canvas.height;
+  return {
+    x: (sx - canvas.width / 2) / ZOOM + camX + canvas.width / 2,
+    y: (sy - canvas.height / 2) / ZOOM + camY + canvas.height / 2,
+  };
+}
+
 function _findOwnBldAt(clientX, clientY) {
-  const _r = canvas.getBoundingClientRect();
-  const _cx = (clientX - _r.left) * (canvas.width / _r.width);
-  const _cy = (clientY - _r.top)  * (canvas.height / _r.height);
-  const _cw = canvas.width, _ch = canvas.height;
-  const wx = (_cx - _cw/2) / ZOOM + camX + _cw/2;
-  const wy = (_cy - _ch/2) / ZOOM + camY + _ch/2;
+  const p = _screenToWorld(clientX, clientY);
   const HR = {3:38, 4:58, 5:50, 6:50, 7:45, 8:30, 9:64, 10:28};
   let best = null, bestD = 9999;
-  for (const b of buildings) {
-    if (!_isOwnBuilding(b)) continue;
-    const d = Math.hypot(wx - b.x, wy - b.y);
-    const r = HR[b.type] || 80;
-    if (d < r && d < bestD) { bestD = d; best = b; }
+  const nearby = (typeof _sgQuery === 'function') ? _sgQuery(p.x, p.y, 180) : buildings;
+  const candidateList = (nearby && nearby.length > 0) ? nearby : buildings;
+  for (const b of candidateList) {
+    if (!b || !_isOwnBuilding(b)) continue;
+    const d = Math.hypot(p.x - b.x, p.y - b.y);
+    const r = (HR[b.type] || 80) + 12;
+    if (d <= r && d < bestD) { bestD = d; best = b; }
   }
   return best;
 }
