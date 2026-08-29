@@ -266,11 +266,12 @@ const io = new Server(server, {
 });
 
 function compactState(state) {
+  const score = Number(state.score ?? state.sc ?? 0) || 0;
   return {
     n: state.name || 'Oyuncu', sk: state.skin || 'default', x: state.x || 0, y: state.y || 0,
     a: state.angle || 0, hp: state.hp ?? 100, mhp: state.maxHp ?? 100, w: state.weapon || 1,
     atk: Boolean(state.isAttacking), k: state.kills || 0, xp: state.xp || 0, g: state.gold || 0,
-    sc: state.score || 0, at: state.axeTier || 0, st: state.swordTier || 0, rk: state.rankId || 0,
+    sc: score, at: state.axeTier || 0, st: state.swordTier || 0, rk: state.rankId || 0,
     color: state.color || '#8B5E3A', team: state.team || '', clanId: state.clanId || '', clanTag: state.clanTag || '', acc: state.acc || {}, vx: state.vx || 0, vy: state.vy || 0,
     bx: typeof state.buildX === 'number' ? state.buildX : null, by: typeof state.buildY === 'number' ? state.buildY : null,
     sq: state.stateSeq || 0, tm: state.stateAt || Date.now(),
@@ -420,7 +421,8 @@ setInterval(() => {
 io.on('connection', (socket) => {
   socket.emit('online_count', io.engine.clientsCount);
   socket.on('join', (data = {}) => {
-    const state = { ...data, name: data.name || 'Oyuncu', hp: data.hp ?? 250, maxHp: data.maxHp ?? 250, id: socket.id, clanId: '', clanTag: '' };
+    const initialScore = Number(data.score ?? data.sc ?? 0) || 0;
+    const state = { ...data, name: data.name || 'Oyuncu', hp: data.hp ?? 250, maxHp: data.maxHp ?? 250, score: initialScore, sc: initialScore, id: socket.id, clanId: '', clanTag: '' };
     const requestedClan = clans.get(String(data.clanId || ''));
     const clanMember = requestedClan?.members?.find(member => member.name === state.name);
     if (requestedClan && clanMember) {
@@ -453,13 +455,15 @@ io.on('connection', (socket) => {
         player.trappedBy = null;
       }
     }
-    for (const key of ['x', 'y', 'angle', 'vx', 'vy', 'isAttacking', 'weapon', 'axeTier', 'swordTier', 'team', 'color', 'skin', 'acc', 'buildX', 'buildY', 'maxHp', 'score', 'sc', 'kills', 'gold', 'xp']) {
+    for (const key of ['x', 'y', 'angle', 'vx', 'vy', 'isAttacking', 'weapon', 'axeTier', 'swordTier', 'team', 'color', 'skin', 'acc', 'buildX', 'buildY', 'maxHp', 'score', 'sc', 'kills', 'gold', 'xp', 'rankId']) {
       if (data[key] !== undefined) player[key] = data[key];
     }
-    if (data.sc !== undefined) player.score = Number(data.sc) || 0;
+    const incomingScore = Number(data.score ?? data.sc ?? player.score ?? 0) || 0;
+    player.score = Math.max(player.score || 0, incomingScore);
+    if (typeof data.sc !== 'undefined') player.sc = Number(data.sc) || 0;
     if (typeof data.seq === 'number' && data.seq > (player.stateSeq || 0)) player.stateSeq = data.seq;
     player.stateAt = Date.now();
-    socket.emit('self_state', { x: player.x, y: player.y, hp: player.hp, seq: data.seq });
+    socket.emit('self_state', { x: player.x, y: player.y, hp: player.hp, sc: player.score, g: player.gold, seq: data.seq });
     socket.broadcast.volatile.emit('players', { [socket.id]: compactState(player) });
   });
 

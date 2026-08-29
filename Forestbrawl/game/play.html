@@ -117,7 +117,7 @@ body>iframe[style]{
 }
 
 #resource-hud{
-  position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:130;display:flex !important;align-items:center;justify-content:center;gap:8px;padding:6px 10px;border-radius:16px;background:rgba(8,13,18,0.68);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.12);box-shadow:0 8px 20px rgba(0,0,0,0.25);visibility:visible !important;opacity:1 !important;width:auto !important;height:auto !important;max-width:none !important;max-height:none !important;pointer-events:auto !important;overflow:visible !important;clip-path:none !important;
+  position:fixed;top:10px;left:10px;transform:none;z-index:130;display:flex !important;align-items:center;justify-content:center;gap:8px;padding:6px 10px;border-radius:16px;background:rgba(8,13,18,0.68);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.12);box-shadow:0 8px 20px rgba(0,0,0,0.25);visibility:visible !important;opacity:1 !important;width:auto !important;height:auto !important;max-width:none !important;max-height:none !important;pointer-events:auto !important;overflow:visible !important;clip-path:none !important;
 }
 .res-item{
   display:flex;align-items:center;gap:6px;background:linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.09);padding:6px 10px;border-radius:12px;min-width:82px;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);
@@ -126,12 +126,13 @@ body>iframe[style]{
 .res-item.stone .res-icon{color:#c6d0db;}
 .res-item.gold .res-icon{color:#ffd64d;}
 .res-item.apple .res-icon{color:#ff7b7b;}
-.res-icon{font-size:16px;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.32));}
+.res-icon{font-size:16px;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.32));display:flex;align-items:center;justify-content:center;}
+.res-icon svg{display:block;width:18px;height:18px;overflow:visible;}
 .res-value{font-size:12px;font-weight:900;letter-spacing:0.5px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.7);}
 @media (max-width: 760px) and (orientation: portrait), (max-width: 900px) and (orientation: landscape){
-  #resource-hud{top:58px;left:50%;transform:translateX(-50%);gap:6px;padding:4px 6px;}
+  #resource-hud{top:58px;left:10px;transform:none;gap:6px;padding:4px 6px;}
   .res-item{min-width:68px;padding:5px 7px;border-radius:10px;}
-  .res-icon{font-size:14px;}
+  .res-icon svg{width:16px;height:16px;}
   .res-value{font-size:11px;}
 }
 
@@ -1399,10 +1400,30 @@ function drawSkinEyesOverlay(c, R, sk, fl) {
 <div id="perf-panel" style="display:none;position:fixed;top:98px;left:10px;z-index:901;background:rgba(0,0,0,0.88);border:1.5px solid rgba(255,255,255,0.18);border-radius:10px;padding:10px 13px;font-size:11px;font-family:monospace;color:#ddd;pointer-events:none;width:260px;line-height:1.65;box-shadow:0 4px 18px rgba(0,0,0,0.7);"></div>
 
 <div id="resource-hud" aria-label="Kaynak durumu">
-  <div class="res-item wood"><span class="res-icon">🌲</span><span id="wood-count" class="res-value">0</span></div>
-  <div class="res-item stone"><span class="res-icon">🪨</span><span id="stone-count" class="res-value">0</span></div>
-  <div class="res-item gold"><span class="res-icon">💰</span><span id="gold-count" class="res-value">0</span></div>
-  <div class="res-item apple"><span class="res-icon">🍎</span><span id="apple-count" class="res-value">0</span></div>
+  <div class="res-item wood">
+    <span class="res-icon" aria-hidden="true">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M31 17c-7 0-11 5-11 11 0 7 5 10 11 10 6 0 11-3 11-10 0-6-4-11-11-11Z" fill="#7ee06b"/><path d="M23 28c0-6 5-11 11-11s11 5 11 11c0 7-5 10-11 10s-11-3-11-10Zm7-8c-2 0-4 2-4 5 0 3 1 5 4 7l4 2 4-2c3-2 4-4 4-7 0-3-2-5-4-5-2 0-3 2-4 4-1-2-2-4-4-4Z" fill="#3cae46"/><rect x="29" y="33" width="4" height="18" rx="2" fill="#7d4f1d"/><path d="M25 39h12v4H25z" fill="#986427" opacity="0.8"/></svg>
+    </span>
+    <span id="wood-count" class="res-value">0</span>
+  </div>
+  <div class="res-item stone">
+    <span class="res-icon" aria-hidden="true">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 26 32 14l16 12v18L32 56 16 44V26Z" fill="#c8ced8"/><path d="M16 26l16 12 16-12-16-12L16 26Z" fill="#dfe6ef"/><path d="M32 38v18" stroke="#9da7b4" stroke-width="3"/><path d="M16 26v18l16 12V38L16 26Z" fill="#aeb7c3" opacity="0.8"/><path d="M48 26v18L32 56V38l16-12Z" fill="#8f99a8" opacity="0.7"/></svg>
+    </span>
+    <span id="stone-count" class="res-value">0</span>
+  </div>
+  <div class="res-item gold">
+    <span class="res-icon" aria-hidden="true">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="17" fill="#f7d24a" stroke="#f5b423" stroke-width="4"/><circle cx="32" cy="32" r="9" fill="#f9e9a1" opacity="0.8"/><path d="M32 18v7M32 39v7M18 32h7M39 32h7" stroke="#fff3b2" stroke-width="3" stroke-linecap="round"/></svg>
+    </span>
+    <span id="gold-count" class="res-value">0</span>
+  </div>
+  <div class="res-item apple">
+    <span class="res-icon" aria-hidden="true">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M34 16c-2-4-8-5-12-2-5 4-5 12 1 15 1 1 3 2 4 4 2 4 2 8 1 12h7c2-6 2-10 0-14 1-2 2-3 4-5 7-5 8-13 2-17-5-3-9-1-7 7Z" fill="#ef5f63"/><path d="M32 16c0-7 7-11 13-7-3 4-4 8-3 12-2-1-6-2-10-5Z" fill="#4eb85f"/><path d="M32 20c-2 0-5 1-6 4 2 1 4 2 6 2 2 0 4-1 6-2-1-3-4-4-6-4Z" fill="#f7c4a6" opacity="0.85"/><path d="M24 39c3 4 7 6 10 6s8-2 10-6" stroke="#b62d32" stroke-width="2.5" stroke-linecap="round"/></svg>
+    </span>
+    <span id="apple-count" class="res-value">0</span>
+  </div>
 </div>
 
 <!-- TOP BAR: buttons (top-right) -->
@@ -7027,6 +7048,7 @@ const _hpText = document.getElementById('hp-text');
 let _uiAppleEl = null, _uiWoodEl = null, _uiStoneEl = null, _uiGoldEl = null, _uiScoreEl = null;
 // Last-written values — skip DOM write when nothing changed
 let _uiLast = { apples: -1, wood: -1, stone: -1, gold: -1, score: -1 };
+let _lastScoreSync = null;
 // Cached DOM references for ultra-fast zero-query HUD updates
 let _domWood = null, _domStone = null, _domGold = null, _domApple = null, _domKills = null, _domScore = null;
 let _domHpBar = null, _domHpText = null, _domXpBar = null, _domXpText = null;
@@ -7058,6 +7080,16 @@ function updateUI() {
   if (_uiScoreEl && _sc !== _uiLast.score) {
     _uiScoreEl.textContent = formatScore(_sc);
     _uiLast.score = _sc;
+  }
+  if (_connected && _socket && _lastScoreSync !== _sc) {
+    _lastScoreSync = _sc;
+    _socket.emit('state', {
+      sc: _sc,
+      gold: player.gold || 0,
+      xp: player.xp || 0,
+      kills: player.kills || 0,
+      rankId: Math.min(typeof _myRankId !== 'undefined' ? _myRankId : 0, 11),
+    });
   }
 
   // Update building count limit badges in hotbar (slots 3-9) with dirty check
@@ -13723,6 +13755,7 @@ function initMultiplayer() {
     }
     // Server-authoritative hp/xp/kills — always accept
     if (typeof s.hp === 'number') player.hp = s.hp;
+    if (typeof s.sc === 'number') player.score = Math.max(player.score || 0, s.sc);
     // Position is client-predicted. The server stores the latest input only;
     // applying its delayed echo here makes high-latency players rubber-band.
     // Gold from server if more authoritative (server manages windmill/pickup income)
@@ -15357,8 +15390,9 @@ setTimeout(_safeDismissLoading, 1200); // Safety fallback
       node.style.setProperty('clip-path','none','important');
       node.style.setProperty('position','fixed','important');
       if (node.id === 'resource-hud') {
-        node.style.setProperty('left','50%','important');
+        node.style.setProperty('left','10px','important');
         node.style.setProperty('top','10px','important');
+        node.style.setProperty('transform','none','important');
       }
     }
     _restoreNode(hud);
@@ -15384,8 +15418,9 @@ setTimeout(_safeDismissLoading, 1200); // Safety fallback
     hud.style.setProperty('max-width','none','important');
     hud.style.setProperty('max-height','none','important');
     hud.style.setProperty('pointer-events','auto','important');
-    hud.style.setProperty('left','50%','important');
+    hud.style.setProperty('left','10px','important');
     hud.style.setProperty('top','10px','important');
+    hud.style.setProperty('transform','none','important');
   }
   _restoreResourceHud();
   [120,320,800,1600,2600,4200,6000].forEach(function(t){ setTimeout(_restoreResourceHud,t); });
