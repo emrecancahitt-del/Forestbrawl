@@ -4771,16 +4771,23 @@ function eatApple() {
     floatingTexts.push({ x: player.x, y: player.y - 50, text: 'Elma yok!', alpha: 1, life: 35, color: '#ff8888' });
   }
 }
-document.getElementById('apple-btn').addEventListener('touchstart', e => { e.preventDefault(); eatApple(); });
-document.getElementById('apple-btn').addEventListener('mousedown', eatApple);
+const appleBtn = document.getElementById('apple-btn');
+if (appleBtn) {
+  appleBtn.addEventListener('touchstart', e => { e.preventDefault(); eatApple(); });
+  appleBtn.addEventListener('mousedown', eatApple);
+}
 
 // ============================================================
 // BUILDING PLACEMENT
 // ============================================================
 // ── BUILD SNAP SETTING (localStorage: fb_build_snap, default true) ──
 let _buildSnapEnabled = (function(){
-  const v = localStorage.getItem('fb_build_snap');
-  return v === null ? true : v === 'true';
+  try {
+    const v = localStorage.getItem('fb_build_snap');
+    return v === null ? true : v === 'true';
+  } catch {
+    return true;
+  }
 })();
 
 function _initSnapSettingsUI() {
