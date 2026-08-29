@@ -5198,9 +5198,7 @@ function tryPlaceBuilding() {
   }
   function _findOwnBldAtGhost(gx, gy) {
     for (const b of buildings) {
-      if (b.hp <= 0) continue;
-      if (_mySocketId !== null && b._ownerId !== _mySocketId) continue;
-      if (_mySocketId === null && b._ownerId !== null) continue;
+      if (!_isOwnBuilding(b)) continue;
       if (_bldOverlap(gx, gy, b)) return b;
     }
     return null;
@@ -5235,7 +5233,7 @@ function tryPlaceBuilding() {
     _sgRebuildTimer = 8; // force spatial grid rebuild next frame on new building
     _trackMission('m3', 1);
     window._updateQuestProgress('builds', 1);
-    localStorage.setItem('fb_total_builds_meta', parseInt(localStorage.getItem('fb_total_builds_meta')||'0',10)+1);
+    _queueBuildMetaUpdate(1);
     _mpBuildPlaced(newB, radii[player.weapon] || 34);
     updateUI();
   } else {
@@ -5472,6 +5470,33 @@ function _doUpgradeAll() {
     }
   }
   _refreshBuildUpgradePanel();
+}
+
+let _pendingBuildMetaAdds = 0;
+let _scheduledBuildMetaWrite = false;
+function _safeStorageGet(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw == null ? fallback : raw;
+  } catch {
+    return fallback;
+  }
+}
+function _queueBuildMetaUpdate(delta) {
+  _pendingBuildMetaAdds += Number(delta) || 0;
+  if (_scheduledBuildMetaWrite) return;
+  _scheduledBuildMetaWrite = true;
+  requestAnimationFrame(() => {
+    _scheduledBuildMetaWrite = false;
+    if (_pendingBuildMetaAdds <= 0) return;
+    try {
+      const prev = Number.parseInt(_safeStorageGet('fb_total_builds_meta', '0'), 10) || 0;
+      localStorage.setItem('fb_total_builds_meta', String(prev + _pendingBuildMetaAdds));
+    } catch {
+      // Ignore storage failures and keep gameplay running.
+    }
+    _pendingBuildMetaAdds = 0;
+  });
 }
 
 // Canvas click → ESC kapatma (açma/kapama mousedown'da yapılıyor)
@@ -13026,6 +13051,13 @@ window.addEventListener('mousemove', e => {
 });
 
 // ── Bina tespiti yardımcısı ──────────────────────────────────
+function _isOwnBuilding(b) {
+  if (!b || b.hp <= 0) return false;
+  if (b._ownerId == null || b._ownerId === '') return true;
+  if (_mySocketId == null || _mySocketId === undefined) return true;
+  return b._ownerId === _mySocketId;
+}
+
 function _findOwnBldAt(clientX, clientY) {
   const _r = canvas.getBoundingClientRect();
   const _cx = (clientX - _r.left) * (canvas.width / _r.width);
@@ -13036,10 +13068,7 @@ function _findOwnBldAt(clientX, clientY) {
   const HR = {3:38, 4:58, 5:50, 6:50, 7:45, 8:30, 9:64, 10:28};
   let best = null, bestD = 9999;
   for (const b of buildings) {
-    // offline: her iki taraf da null → eşit; online: socket id eşleşmeli
-    if (b.hp <= 0) continue;
-    if (_mySocketId !== null && b._ownerId !== _mySocketId) continue;
-    if (_mySocketId === null && b._ownerId !== null) continue;
+    if (!_isOwnBuilding(b)) continue;
     const d = Math.hypot(wx - b.x, wy - b.y);
     const r = HR[b.type] || 80;
     if (d < r && d < bestD) { bestD = d; best = b; }
@@ -13053,17 +13082,22 @@ function _toggleUpgPanel(b) {
   else showBuildUpgradePanel(b);
 }
 
-canvas.addEventListener('mousedown', e => {
+function _handleBuildInteraction(e) {
+  if (!e || e.button === 2) return;
   _tryInitAudio();
-  if (e.button === 0) {
-    if (player.weapon === 10) { fireBowArrow(); return; }
-    // Kendi binasına tıklandıysa → panel aç, isAttacking SET ETME (ghost preview & placement yok)
-    const hit = _findOwnBldAt(e.clientX, e.clientY);
-    if (hit) { _toggleUpgPanel(hit); return; }
-    // Bina dışında tıklandı → paneli kapat, saldırıya geç
-    hideBuildUpgradePanel();
-    player.isAttacking = true;
-  }
+  if (player.weapon === 10) { fireBowArrow(); return; }
+  const hit = _findOwnBldAt(e.clientX, e.clientY);
+  if (hit) { _toggleUpgPanel(hit); return; }
+  hideBuildUpgradePanel();
+  player.isAttacking = true;
+}
+
+canvas.addEventListener('pointerdown', e => {
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  _handleBuildInteraction(e);
+});
+canvas.addEventListener('mousedown', e => {
+  if (e.button === 0) _handleBuildInteraction(e);
   if (e.button === 2) { e.preventDefault(); fireBowArrow(); }
 });
 canvas.addEventListener('contextmenu', e => e.preventDefault());
