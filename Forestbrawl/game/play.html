@@ -1883,27 +1883,30 @@ const _isMobile = ('ontouchstart' in window || navigator.maxTouchPoints > 0) && 
 let ZOOM = _isMobile ? 0.42 : 0.55;
 let camX = 0, camY = 0, _camReady = false;
 
-// ── MOOMOO.IO / SPLOOP.IO MAP (square world, cross-shaped forest hub) ────────
-const WORLD = 7200;
-const BIOME_EDGE = 0.34;
+// ── Large Taming.io / Sploop.io-inspired world — 4 biome families only ───────
+const WORLD = 9800;
+const BIOME_EDGE = 0.30;
 const BIOME_BORDER = WORLD * BIOME_EDGE;
-const LAND_RADIUS = WORLD * 0.94;
-const PLAY_RADIUS = WORLD * 0.90;
+const LAND_RADIUS = WORLD * 0.96;
+const PLAY_RADIUS = WORLD * 0.92;
 
+const _BIOME_ALIASES = { snow: 'winter', swamp: 'lava', darkforest: 'lava' };
+function normalizeBiome(b) {
+  return _BIOME_ALIASES[b] || b || 'forest';
+}
 function getBiome(x, y) {
   const nx = x / WORLD;
   const ny = y / WORLD;
   if (Math.abs(nx) < BIOME_EDGE && Math.abs(ny) < BIOME_EDGE) return 'forest';
-  if (Math.abs(ny) >= Math.abs(nx)) return ny < 0 ? 'snow' : 'swamp';
-  return nx > 0 ? 'desert' : 'darkforest';
+  if (Math.abs(ny) >= Math.abs(nx)) return ny < 0 ? 'winter' : 'lava';
+  return nx > 0 ? 'desert' : 'lava';
 }
 
 const BIOME_LABELS = {
   forest: '🌿 Orman',
-  snow: '❄️ Kar Diyarı',
+  winter: '❄️ Kış Diyarı',
   desert: '☀️ Çöl',
-  swamp: '☘️ Bataklık',
-  darkforest: '☠️ Zehir Ormanı',
+  lava: '🔥 Lav Vadisi',
 };
 
 // ── Seeded PRNG (mulberry32) — identical to server, for deterministic world sync ──
@@ -2128,15 +2131,14 @@ function _buildBgCache() {
   c.fillStyle = fEdge;
   c.fillRect(-B, -B, B * 2, B * 2);
 
-  // === WEST — dark forest / poison ===
-  c.fillStyle = '#3a1e50';
+  // === WEST — lava ===
+  c.fillStyle = '#4a1208';
   c.fillRect(-L, -L, L - B, L * 2);
-  // Deep purple variation blobs
   for (const [gpx, gpy, gpc, gr] of [
-    [-L*.65,  L*.10, '#5a2880', L*.55],
-    [-L*.40, -L*.25, '#441870', L*.45],
-    [-L*.55,  L*.35, '#2e1040', L*.50],
-    [-L*.30,  L*.50, '#4e2278', L*.40],
+    [-L*.65,  L*.10, '#7d1d0a', L*.55],
+    [-L*.40, -L*.25, '#561008', L*.45],
+    [-L*.55,  L*.35, '#350b06', L*.50],
+    [-L*.30,  L*.50, '#6a180c', L*.40],
   ]) {
     const g = c.createRadialGradient(gpx, gpy, 0, gpx, gpy, gr);
     g.addColorStop(0, gpc + 'aa');
@@ -2144,20 +2146,18 @@ function _buildBgCache() {
     c.fillStyle = g;
     c.fillRect(-L, -L, L - B, L * 2);
   }
-  // Edge darkness gradient
   const wGrd = c.createLinearGradient(-L, 0, -B, 0);
-  wGrd.addColorStop(0, 'rgba(20,8,35,0.85)');
-  wGrd.addColorStop(0.6, 'rgba(50,20,75,0.30)');
-  wGrd.addColorStop(1, 'rgba(60,30,90,0)');
+  wGrd.addColorStop(0, 'rgba(20,8,8,0.88)');
+  wGrd.addColorStop(0.55, 'rgba(80,20,12,0.45)');
+  wGrd.addColorStop(1, 'rgba(120,32,18,0)');
   c.fillStyle = wGrd;
   c.fillRect(-L, -L, L - B, L * 2);
-  // Poison mist glow patches
   c.save();
   c.globalAlpha = 0.10;
-  c.fillStyle = '#9933ff';
+  c.fillStyle = '#ff7a1a';
   for (const [mx, my, mr] of [[-L*.5, 0, L*.18], [-L*.7, -L*.3, L*.12], [-L*.4, L*.4, L*.15]]) {
     const mg = c.createRadialGradient(mx, my, 0, mx, my, mr);
-    mg.addColorStop(0, 'rgba(160,50,255,0.6)'); mg.addColorStop(1, 'rgba(160,50,255,0)');
+    mg.addColorStop(0, 'rgba(255,120,30,0.7)'); mg.addColorStop(1, 'rgba(255,120,30,0)');
     c.fillStyle = mg; c.fillRect(-L, -L, L - B, L * 2);
   }
   c.restore();
@@ -2197,15 +2197,14 @@ function _buildBgCache() {
   }
   c.restore();
 
-  // === SOUTH — swamp ===
-  c.fillStyle = '#2e5a1e';
+  // === SOUTH — lava ===
+  c.fillStyle = '#5a190b';
   c.fillRect(-L, B, L * 2, L - B);
-  // Murky swamp blobs — dark greens and olive
   for (const [gpx, gpy, gpc, gr] of [
-    [-L*.20, L*.55, '#3a7020', L*.55],
-    [ L*.30, L*.70, '#284e18', L*.50],
-    [-L*.50, L*.40, '#446030', L*.48],
-    [ L*.10, L*.45, '#356028', L*.45],
+    [-L*.20, L*.55, '#7a270f', L*.55],
+    [ L*.30, L*.70, '#45130b', L*.50],
+    [-L*.50, L*.40, '#8b2a12', L*.48],
+    [ L*.10, L*.45, '#611907', L*.45],
   ]) {
     const g = c.createRadialGradient(gpx, gpy, 0, gpx, gpy, gr);
     g.addColorStop(0, gpc + 'bb');
@@ -2214,23 +2213,21 @@ function _buildBgCache() {
     c.fillRect(-L, B, L * 2, L - B);
   }
   const sGrd = c.createLinearGradient(0, B, 0, L);
-  sGrd.addColorStop(0, 'rgba(30,55,15,0)');
-  sGrd.addColorStop(1, 'rgba(18,35,10,0.90)');
+  sGrd.addColorStop(0, 'rgba(95,28,12,0)');
+  sGrd.addColorStop(1, 'rgba(40,10,8,0.92)');
   c.fillStyle = sGrd;
   c.fillRect(-L, B, L * 2, L - B);
-  // Murky water puddles
   c.save();
-  c.globalAlpha = 0.13;
+  c.globalAlpha = 0.14;
   for (const [px, py, pr] of [[-L*.25, L*.6, L*.07], [L*.15, L*.75, L*.06], [-L*.55, L*.8, L*.05]]) {
-    c.fillStyle = '#1a4a28';
+    c.fillStyle = '#ff8b3d';
     c.beginPath(); c.ellipse(px, py, pr, pr * 0.5, 0.3, 0, Math.PI * 2); c.fill();
   }
   c.restore();
 
-  // === NORTH — snow ===
+  // === NORTH — winter ===
   c.fillStyle = '#ddeef8';
   c.fillRect(-L, -L, L * 2, L - B);
-  // Snow depth variation
   for (const [gpx, gpy, gpc, gr] of [
     [ L*.10, -L*.55, '#f0f8ff', L*.60],
     [-L*.30, -L*.40, '#c8ddf0', L*.50],
@@ -2248,6 +2245,7 @@ function _buildBgCache() {
   nGrd.addColorStop(1, 'rgba(220,240,255,0)');
   c.fillStyle = nGrd;
   c.fillRect(-L, -L, L * 2, L - B);
+
   // Snow sparkle dots
   c.save();
   c.globalAlpha = 0.20;
@@ -4411,14 +4409,14 @@ function drawRankBadge12(ctx, cx, cy, rankId, size, t) {
   ctx.fillStyle = _gc.fill;
   _drawDodecagon(ctx,r);ctx.fill();
 
-  // Border — thicker for higher ranks
+  // Border — thinner and cleaner for better readability
   ctx.strokeStyle=cb;
-  ctx.lineWidth=rid<=2?1.6:rid<=6?1.9:rid<=9?2.1:2.4;
+  ctx.lineWidth=rid<=2?1.1:rid<=6?1.3:rid<=9?1.5:1.7;
   _drawDodecagon(ctx,r);ctx.stroke();
 
   // Inner trim ring
   const trimA=[0.18,0.12,0.18,0.22,0.28,0.30,0.32,0.35,0.28,0.22,0.35,0.42][rid];
-  ctx.strokeStyle=`rgba(255,255,255,${trimA})`;ctx.lineWidth=1;
+  ctx.strokeStyle=`rgba(255,255,255,${trimA})`;ctx.lineWidth=0.8;
   _drawDodecagon(ctx,r*0.68);ctx.stroke();
 
   // Top-left shine overlay — CACHED
@@ -4462,27 +4460,27 @@ function drawNameTag12(ctx, wx, wy, name, rankId, hpRatio, isOwn, t) {
   const rid = Math.max(0, Math.min(11, (rankId|0)));
   const BR  = isOwn ? 7 : 6;    // badge radius — compacted
   const FS  = isOwn ? 8 : 7;    // name font size — compacted
-  const GAP = 4;
+  const GAP = 2;                // tiny gap between name and badge
 
   ctx.save();
   ctx.font = `900 ${FS}px Arial`;
   ctx.textBaseline = 'middle';
   const tw = ctx.measureText(name).width;
-  const totalW = BR * 2 + GAP + tw;
-  const lx = wx - totalW / 2; // left edge of entire tag
+  const totalW = tw + GAP + BR * 2 + 2;
+  const lx = wx - totalW / 2;
 
   // ── Name text ──
-  const nameX = lx + BR * 2 + GAP;
+  const nameX = lx;
   const nameCol = isOwn ? '#ffffff' : (hpRatio < 0.30 ? '#ff7777' : '#ffffff');
-  ctx.strokeStyle = 'rgba(0,0,0,0.92)';
-  ctx.lineWidth = 3;
+  ctx.strokeStyle = 'rgba(0,0,0,0.80)';
+  ctx.lineWidth = 1.8;
   ctx.textAlign = 'left';
   ctx.strokeText(name, nameX, wy);
   ctx.fillStyle = nameCol;
   ctx.fillText(name, nameX, wy);
 
-  // ── Badge ──
-  drawRankBadge12(ctx, lx + BR, wy, rid, BR, t);
+  // ── Badge on the right side of the name with a tiny gap ──
+  drawRankBadge12(ctx, nameX + tw + GAP + BR, wy, rid, BR, t);
 
   ctx.restore();
 }
@@ -4501,14 +4499,14 @@ function _drawNameTagCached(ctx, sx, sy, name, rankId, hpRatio, isOwn, t) {
   let entry = _NT_OC_CACHE.get(key);
   if (!entry) {
     // Measure text to size the OC exactly (no padding waste)
-    const BR = isOwn ? 7 : 6, FS = isOwn ? 8 : 7, GAP = 4;
+    const BR = isOwn ? 7 : 6, FS = isOwn ? 8 : 7, GAP = 2;
     _NT_MEAS_CTX.font = '900 ' + FS + 'px Arial';
     const tw = _NT_MEAS_CTX.measureText(name).width;
-    const totalW = BR * 2 + GAP + tw;
+    const totalW = tw + GAP + BR * 2 + 2;
     const pad = 6;
     const ocW = Math.ceil(totalW + pad * 2);
-    const anchorX = pad + totalW / 2; // world sx maps to this X in OC
-    const anchorY = pad + BR + 2;     // world sy (name baseline) maps to this Y in OC
+    const anchorX = pad + totalW / 2;
+    const anchorY = pad + BR + 2;
     const ocH = Math.ceil(anchorY + BR * 1.5 + pad);
     const oc = new OffscreenCanvas(ocW, ocH);
     const occ = oc.getContext('2d');
@@ -6493,9 +6491,8 @@ function drawArmorDrops(){
 // ============================================================
 const _BIOME_AMBIENT = {
   forest:     { color:['#44aa22','#88cc44','#228822'], shape:'leaf',  rate:4, spd:0.6 },
-  snow:       { color:['#ffffff','#ccddff','#eeeeff'], shape:'snow',  rate:5, spd:0.4 },
-  darkforest: { color:['#330044','#440055','#220033'], shape:'ash',   rate:3, spd:0.5 },
-  swamp:      { color:['#44ff88','#88ffaa','#22cc66'], shape:'spore', rate:3, spd:0.35 },
+  winter:     { color:['#ffffff','#ccddff','#eeeeff'], shape:'snow',  rate:5, spd:0.4 },
+  lava:       { color:['#ff8a1a','#ff5a00','#aa2200'], shape:'ash',   rate:3, spd:0.5 },
   desert:     { color:['#ddaa44','#ccaa22','#bbaa55'], shape:'sand',  rate:6, spd:0.9 },
 };
 function updateAmbientParticles(){
@@ -11041,13 +11038,13 @@ function drawGroundDetailsDirect(c) {
   if (maxX > WORLD) c.fillRect(WORLD, minY, maxX - WORLD, maxY - minY);
   if (minY < -WORLD) c.fillRect(minX, minY, maxX - minX, -WORLD - minY);
   if (maxY > WORLD) c.fillRect(minX, WORLD, maxX - minX, maxY - WORLD);
-  // ── Sploop.io style: seyrek ve düşük kontrastlı oyun ızgarası ──
+  // ── Very subtle Sploop.io-like grid: almost invisible, only helping with spacing ──
   if (!_gridPattern || Math.abs(_gridPatternZoom - ZOOM) > 0.01) {
     const _gridTile = document.createElement('canvas');
     _gridTile.width = GRID_SIZE; _gridTile.height = GRID_SIZE;
     const _gridTileCtx = _gridTile.getContext('2d');
-    _gridTileCtx.strokeStyle = 'rgba(0, 0, 0, 0.07)';
-    _gridTileCtx.lineWidth = Math.max(0.6, 0.85 / ZOOM);
+    _gridTileCtx.strokeStyle = 'rgba(0, 0, 0, 0.02)';
+    _gridTileCtx.lineWidth = 0.35;
     _gridTileCtx.beginPath();
     _gridTileCtx.moveTo(0, 0); _gridTileCtx.lineTo(GRID_SIZE, 0);
     _gridTileCtx.moveTo(0, 0); _gridTileCtx.lineTo(0, GRID_SIZE);
@@ -11060,13 +11057,13 @@ function drawGroundDetailsDirect(c) {
 
   // ── Biome Divider Line ──
   const B = BIOME_BORDER;
-  c.strokeStyle = 'rgba(0, 0, 0, 0.08)';
-  c.lineWidth = 1.5;
+  c.strokeStyle = 'rgba(0, 0, 0, 0.04)';
+  c.lineWidth = 1.0;
   c.strokeRect(-B, -B, B * 2, B * 2);
 
-  // ── Map Red Border Walls ──
-  c.strokeStyle = 'rgba(220, 45, 45, 0.88)';
-  c.lineWidth = 36;
+  // ── Map border walls softened to a light outline ──
+  c.strokeStyle = 'rgba(220, 45, 45, 0.30)';
+  c.lineWidth = 18;
   c.strokeRect(-WORLD, -WORLD, WORLD * 2, WORLD * 2);
   c.restore();
 }
@@ -12417,10 +12414,9 @@ function update(timestamp = 0) {
     }
   } catch(e) { while(_tgSaveDepth-- > 0){try{ctx.restore();}catch(e2){}} if(typeof ctx!=='undefined'){try{ctx.globalAlpha=1;}catch(e2){}} }
 
-  // === STATIC WORLD LAYER: grid + biome borders + zone labels + walls =========
+  // === STATIC WORLD LAYER: subtle grid + biome borders + zone labels + walls =========
   // OC-cached — rebuilt only when camera moves >35% of viewport, or zoom/quality
-  // ── Train rails (below everything) ─────────────────────────────────────
-  drawTrainRails();
+  // Train/rail layer is intentionally disabled to match the cleaner Sploop.io aesthetic.
 
   // Biome borders, zone labels, and map walls are now baked into _gridOC above.
 
@@ -12494,7 +12490,7 @@ function update(timestamp = 0) {
     if (_resourceImage) {
       ctx.save();
       ctx.translate(rx, ry);
-      _drawCenteredSprite(ctx, _resourceImage, R * 3.2);
+      _drawCenteredSprite(ctx, _resourceImage, R * 2.6);
       ctx.restore();
     } else {
       const baked = _getBakedResource(res.type, biome, R);
@@ -12504,7 +12500,8 @@ function update(timestamp = 0) {
         if (res.type === 'wood' || res.type === 'apple' || res.type === 'bush') {
           ctx.rotate(Math.sin(t * 0.018 + rx * 0.003) * 0.028);
         }
-        ctx.drawImage(baked.cnv, -baked.pad, -baked.pad);
+        const drawScale = 0.82;
+        ctx.drawImage(baked.cnv, -baked.pad * drawScale, -baked.pad * drawScale, baked.cnv.width * drawScale, baked.cnv.height * drawScale);
         ctx.restore();
       }
     }
@@ -12716,11 +12713,7 @@ function update(timestamp = 0) {
   drawSpawnShield();
   _drawLocalChatBubble();
 
-  // ── Train (above player, below floating texts) ──────────────────────────
-  drawTrain();
-  _updateTrainBtn();
-  // Train simulation updated smoothly every frame
-  _stepTrainSim();
+  // ── Train/rail layer disabled for cleaner Sploop.io feel ─────────────────
 
   // Layer 8: floating texts — capped + batched for perf
   // Cap: truncate oldest (O(1) instead of O(n) splice)
@@ -14842,121 +14835,12 @@ function _tSimBack(si, t, dist) {
 }
 
 function _stepTrainSim() {
-  const now=Date.now();
-  if(_tSim.stopped){
-    if(now<_tSim.stopUntil){ _trainSt.stopped=true; _trainSt.stopName=_TRAIN_WPS[_tSim.segIdx].stopName||''; return; }
-    _tSim.stopped=false; _trainSt.stopped=false; _trainSt.stopName='';
-  }
-  // Scale by _dt so train speed is fps-independent (same real-world speed at 30 or 60 fps)
-  _tSim.t+=_TRAIN_SPD/_TRAIN_SEG_LENS[_tSim.segIdx]*_dt;
-  while(_tSim.t>=1){
-    _tSim.t-=1; _tSim.segIdx=(_tSim.segIdx+1)%_TRAIN_N;
-    const wp=_TRAIN_WPS[_tSim.segIdx];
-    if(wp.isStop){ _tSim.stopped=true; _tSim.stopUntil=now+_TRAIN_STOP_DUR; _tSim.t=0; _trainSt.stopped=true; _trainSt.stopName=wp.stopName||''; break; }
-  }
-  const loco=_tSimPos(_tSim.segIdx,_tSim.t);
-  _trainSt.x=loco.x; _trainSt.y=loco.y; _trainSt.ang=loco.angle;
-  for(let ci=0;ci<5;ci++) _trainSt.cars[ci]=_tSimBack(_tSim.segIdx,_tSim.t,_TRAIN_CAR_GAP*(ci+1));
-  // Move player with train — only in offline mode.
-  // Online: server drives player position via _stepTrain(); client just reads own_state.
-  if(_onTrain && _GAME_MODE!=='online'){
-    const cp=_trainSt.cars[0];
-    player.x=cp.x; player.y=cp.y;
-    player.vx=0; player.vy=0; player.momX=0; player.momY=0;
-  }
+  // Train system disabled to keep the map clean and minimal.
 }
 
 // ── RAYLAR ──────────────────────────────────────────────────────────────────
 function drawTrainRails() {
-  const n=_TRAIN_N;
-  // Viewport bounds in world space (same formula as render loop)
-  const _cw=canvas.width, _ch=canvas.height;
-  const _rM=220;
-  const _rL=camX+_cw/2*(1-1/ZOOM)-_rM, _rR=camX+_cw/2*(1+1/ZOOM)+_rM;
-  const _rT=camY+_ch/2*(1-1/ZOOM)-_rM, _rB=camY+_ch/2*(1+1/ZOOM)+_rM;
-
-  for(let i=0;i<n;i++){
-    const a=_TRAIN_WPS[i], b=_TRAIN_WPS[(i+1)%n];
-    // Viewport cull: skip segment if entirely off-screen
-    const sMinX=Math.min(a.x,b.x)-30, sMaxX=Math.max(a.x,b.x)+30;
-    const sMinY=Math.min(a.y,b.y)-30, sMaxY=Math.max(a.y,b.y)+30;
-    if(sMaxX<_rL||sMinX>_rR||sMaxY<_rT||sMinY>_rB) continue;
-
-    const ang=Math.atan2(b.y-a.y,b.x-a.x);
-    const px=Math.sin(ang), py=-Math.cos(ang);
-    const segLen=_TRAIN_SEG_LENS[i];
-
-    // Travers (ray bağları) — batch all ties into ONE beginPath/stroke call
-    if(_qualityLevel > 0) {
-      const slGap=38, cnt=Math.max(1,Math.floor(segLen/slGap));
-      ctx.strokeStyle='#5a3818'; ctx.lineWidth=10; ctx.lineCap='square';
-      ctx.beginPath();
-      for(let k=0;k<=cnt;k++){
-        const tt=k/cnt;
-        const sx=a.x+(b.x-a.x)*tt, sy=a.y+(b.y-a.y)*tt;
-        ctx.moveTo(sx+px*20,sy+py*20); ctx.lineTo(sx-px*20,sy-py*20);
-      }
-      ctx.stroke();
-    }
-
-    // İki çelik ray — batch shadows and rails separately (2 draw calls per segment instead of 6)
-    ctx.lineCap='butt';
-    // Shadow pass (both rails in one path)
-    ctx.strokeStyle='rgba(0,0,0,0.35)'; ctx.lineWidth=7;
-    ctx.beginPath();
-    ctx.moveTo(a.x+px*14,a.y+py*14+2); ctx.lineTo(b.x+px*14,b.y+py*14+2);
-    ctx.moveTo(a.x-px*14,a.y-py*14+2); ctx.lineTo(b.x-px*14,b.y-py*14+2);
-    ctx.stroke();
-    // Rail pass
-    ctx.strokeStyle='#b0b0b0'; ctx.lineWidth=5;
-    ctx.beginPath();
-    ctx.moveTo(a.x+px*14,a.y+py*14); ctx.lineTo(b.x+px*14,b.y+py*14);
-    ctx.moveTo(a.x-px*14,a.y-py*14); ctx.lineTo(b.x-px*14,b.y-py*14);
-    ctx.stroke();
-    // Highlight (skip at quality 0 for speed)
-    if(_qualityLevel > 0){
-      ctx.strokeStyle='rgba(255,255,255,0.25)'; ctx.lineWidth=2;
-      ctx.beginPath();
-      ctx.moveTo(a.x+px*14+px,a.y+py*14+py); ctx.lineTo(b.x+px*14+px,b.y+py*14+py);
-      ctx.moveTo(a.x-px*14+px,a.y-py*14+py); ctx.lineTo(b.x-px*14+px,b.y-py*14+py);
-      ctx.stroke();
-    }
-  }
-
-  // İstasyon platformları
-  for(const wp of _TRAIN_WPS){
-    if(!wp.isStop) continue;
-    const biome=getBiome(wp.x,wp.y);
-    const pCol={forest:'#5a3e22',snow:'#c8dde8',desert:'#c8a044',swamp:'#3a5228',darkforest:'#2a1838'}[biome]||'#604030';
-    ctx.save();
-    if (_shadowOk) { ctx.shadowColor='rgba(0,0,0,0.45)'; ctx.shadowBlur=12; }
-    // Platform gövdesi
-    ctx.fillStyle=pCol; ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=3;
-    ctx.beginPath(); ctx.roundRect(wp.x-95,wp.y-44,190,88,10); ctx.fill(); ctx.stroke();
-    // Şerit doku
-    ctx.fillStyle='rgba(255,255,255,0.06)';
-    for(let s=0;s<6;s++) ctx.fillRect(wp.x-88+s*32,wp.y-42,16,84);
-    // İstasyon tabelası
-    ctx.shadowBlur=0;
-    ctx.fillStyle='rgba(0,0,0,0.75)';
-    ctx.beginPath(); ctx.roundRect(wp.x-72,wp.y-64,144,26,5); ctx.fill();
-    ctx.fillStyle='#ffee66'; ctx.font='bold 11px Arial'; ctx.textAlign='center';
-    ctx.fillText(wp.stopName||'🚉',wp.x,wp.y-46);
-    // Tren durursa titreyen halka
-    if(_trainSt.stopped && Math.hypot(wp.x-_trainSt.x,wp.y-_trainSt.y)<220){
-      const pulse=0.5+0.5*Math.sin(globalTime*0.14);
-      ctx.strokeStyle=`rgba(255,220,40,${0.35+pulse*0.55})`;
-      ctx.lineWidth=3; ctx.setLineDash([10,8]);
-      ctx.beginPath(); ctx.arc(wp.x,wp.y,165+pulse*18,0,Math.PI*2); ctx.stroke();
-      ctx.setLineDash([]);
-      // "BİN!" etiketi
-      ctx.fillStyle=`rgba(255,240,80,${0.7+pulse*0.3})`;
-      ctx.font='bold 14px Arial'; ctx.textAlign='center';
-      ctx.strokeStyle='rgba(0,0,0,0.8)'; ctx.lineWidth=3;
-      ctx.strokeText('🚂 BİN!',wp.x,wp.y+62); ctx.fillText('🚂 BİN!',wp.x,wp.y+62);
-    }
-    ctx.restore();
-  }
+  // Disabled: the map is intentionally kept clean and low-contrast to match the Sploop.io style.
 }
 
 // ── TREN OC CACHE ────────────────────────────────────────────────────────────
@@ -15182,62 +15066,7 @@ function _drawCar(c,x,y,ang,idx){
 
 // ── TREN ÇIZIM ANA FONKSİYON ────────────────────────────────────────────────
 function drawTrain(){
-  const st=_trainSt;
-  if(!st) return;
-  // Vagonlar arkadan öne
-  for(let ci=4;ci>=0;ci--){
-    const car=st.cars[ci];
-    if(!car) continue;
-    _drawCar(ctx,car.x,car.y,car.angle||car.ang||0,ci);
-  }
-  // Lokomotif
-  _drawLoco(ctx,st.x,st.y,st.ang||0);
-  // Duman & Buhar partikülü
-  if(!st.stopped){
-    const _ca=st.ang||0;
-    const cx=st.x+Math.cos(_ca)*124, cy=st.y+Math.sin(_ca)*124;
-    // Ana duman bulutları — kalite 0'da seyrek, kalite 1+'da yoğun
-    const _smokeRate = _qualityLevel===0 ? 0.22 : _qualityLevel===1 ? 0.50 : 0.72;
-    if(Math.random()<_smokeRate){
-      const gr=130+Math.floor(Math.random()*40);
-      particles.push({ x:cx+(Math.random()-0.5)*10, y:cy-14,
-        vx:(Math.random()-0.5)*2.0-Math.sin(_ca)*0.5,
-        vy:-2.0-Math.random()*2.8,
-        r:10+Math.random()*14, life:44+Math.random()*26, maxLife:70,
-        color:`rgba(${gr},${gr},${gr+8},${0.5+Math.random()*0.28})` });
-    }
-    // Buhar patlaması — sadece kalite 1+
-    if(_qualityLevel>=1 && Math.random()<0.20){
-      particles.push({ x:cx+(Math.random()-0.5)*16, y:cy-8,
-        vx:(Math.random()-0.5)*4.5, vy:-3.8-Math.random()*3.5,
-        r:18+Math.random()*12, life:24+Math.random()*16, maxLife:40,
-        color:`rgba(220,225,235,${0.38+Math.random()*0.18})` });
-    }
-    // Ray kıvılcımları — sadece yeterli kalitede göster
-    if(_qualityLevel >= 1 && Math.random()<0.22){
-      const sx=st.x+Math.cos(_ca+Math.PI*0.5)*55, sy=st.y+Math.sin(_ca+Math.PI*0.5)*55;
-      particles.push({ x:sx+(Math.random()-0.5)*18, y:sy+(Math.random()-0.5)*18,
-        vx:(Math.random()-0.5)*10, vy:(Math.random()-0.5)*10,
-        r:1.4+Math.random()*2, life:7+Math.random()*7, maxLife:14,
-        color:Math.random()<0.5?'#ffee44':'#ffaa22' });
-      const sx2=st.x+Math.cos(_ca-Math.PI*0.5)*55, sy2=st.y+Math.sin(_ca-Math.PI*0.5)*55;
-      particles.push({ x:sx2+(Math.random()-0.5)*18, y:sy2+(Math.random()-0.5)*18,
-        vx:(Math.random()-0.5)*10, vy:(Math.random()-0.5)*10,
-        r:1.4+Math.random()*2, life:7+Math.random()*7, maxLife:14,
-        color:Math.random()<0.5?'#ffee44':'#ffaa22' });
-    }
-  }
-  // Durak varış göstergesi
-  if(st.stopped&&st.stopName){
-    const sw=_trainSt, pulse=0.5+0.5*Math.sin(globalTime*0.12);
-    ctx.save();
-    ctx.fillStyle=`rgba(0,0,0,${0.55+pulse*0.1})`;
-    ctx.beginPath(); ctx.roundRect(sw.x-100,sw.y-88,200,32,8); ctx.fill();
-    ctx.fillStyle=`rgba(255,230,60,${0.8+pulse*0.2})`;
-    ctx.font='bold 13px Arial'; ctx.textAlign='center';
-    ctx.fillText('🚂 '+sw.stopName,sw.x,sw.y-68);
-    ctx.restore();
-  }
+  // Disabled: the train and station system is intentionally removed for the cleaner map.
 }
 
 // ── BOARDING BUTONU ──────────────────────────────────────────────────────────
@@ -15269,38 +15098,9 @@ const _trainBtnAction = () => {
   }
 };
 function _updateTrainBtn(){
-  // One-time lazy init: find the element and attach listeners after HTML is fully parsed
-  if(!_trainBtnSetup){
-    _trainBtnEl = document.getElementById('train-btn');
-    if(_trainBtnEl){
-      _trainBtnSetup = true;
-      _trainBtnEl.addEventListener('click', _trainBtnAction);
-      _trainBtnEl.addEventListener('touchend', (e)=>{ e.preventDefault(); _trainBtnAction(); },{passive:false});
-    }
-  }
-  if(!_trainBtnEl) return;
-  // Measure distance to nearest part: loco + all cars
-  let _minDist = Math.hypot(player.x-_trainSt.x, player.y-_trainSt.y);
-  for(let _ci=0;_ci<_trainSt.cars.length;_ci++){
-    const _cc=_trainSt.cars[_ci];
-    if(!_cc) continue;
-    const _cd=Math.hypot(player.x-_cc.x, player.y-_cc.y);
-    if(_cd<_minDist) _minDist=_cd;
-  }
-  const nearTrain = _minDist < 320;
-  if(_onTrain){
-    _trainBtnEl.innerHTML='🚂<br>İN';
-    _trainBtnEl.style.display='flex';
-    _trainBtnEl.style.background='linear-gradient(135deg,#e05500,#992200)';
-    _trainBtnEl.style.borderColor='rgba(255,150,80,0.7)';
-  } else if(nearTrain){
-    _trainBtnEl.innerHTML='🚂<br>BİN!';
-    _trainBtnEl.style.display='flex';
-    _trainBtnEl.style.background='linear-gradient(135deg,#22aa55,#166633)';
-    _trainBtnEl.style.borderColor='rgba(100,255,150,0.7)';
-  } else {
-    _trainBtnEl.style.display='none';
-  }
+  // Disabled: train UI and boarding are removed from the active game view.
+  const _trainBtnHide = document.getElementById('train-btn');
+  if (_trainBtnHide) _trainBtnHide.style.display = 'none';
 }
 
 // ── TREN HİT EFEKTİ ─────────────────────────────────────────────────────────
