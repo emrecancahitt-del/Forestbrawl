@@ -254,15 +254,15 @@ body>iframe[style]{
   background:rgba(255,255,255,0.07);
   border:2.5px solid rgba(255,255,255,0.18);border-radius:13px;
   display:flex;flex-direction:column;justify-content:center;align-items:center;gap:0;
-  cursor:pointer;position:relative;flex-shrink:0;transition:all 0.13s;
+  cursor:pointer;position:relative;flex-shrink:0;transition:none;
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.12),0 4px 12px rgba(0,0,0,0.5);
 }
 .inv-slot:hover{background:rgba(255,255,255,0.11);border-color:rgba(255,255,255,0.3);}
-.inv-slot:active{transform:scale(0.84);}
+.inv-slot:active{transform:none;}
 .inv-slot.active{
   border-color:#ffdd30;background:rgba(255,215,40,0.22);
-  transform:translateY(-7px) scale(1.05);
-  box-shadow:0 10px 28px rgba(0,0,0,0.75),0 0 0 2.5px rgba(255,215,30,0.6),0 0 20px rgba(255,200,0,0.4),inset 0 1px 0 rgba(255,255,255,0.3);
+  transform:none;
+  box-shadow:0 8px 18px rgba(0,0,0,0.65),0 0 0 1.5px rgba(255,215,30,0.55),inset 0 1px 0 rgba(255,255,255,0.2);
 }
 .slot-num{
   position:absolute;top:3px;left:5px;
@@ -1884,11 +1884,11 @@ let ZOOM = _isMobile ? 0.42 : 0.55;
 let camX = 0, camY = 0, _camReady = false;
 
 // ── Large Taming.io / Sploop.io-inspired world — 4 biome families only ───────
-const WORLD = 9800;
-const BIOME_EDGE = 0.30;
+const WORLD = 7200;
+const BIOME_EDGE = 0.25;
 const BIOME_BORDER = WORLD * BIOME_EDGE;
-const LAND_RADIUS = WORLD * 0.96;
-const PLAY_RADIUS = WORLD * 0.92;
+const LAND_RADIUS = WORLD * 0.94;
+const PLAY_RADIUS = WORLD * 0.90;
 
 const _BIOME_ALIASES = { snow: 'winter', swamp: 'lava', darkforest: 'lava' };
 function normalizeBiome(b) {
@@ -1968,8 +1968,8 @@ function _loadSprite(name, category) {
 }
 function _preloadStaticSprites() {
   const resources = [
-    'asset/tree-forest.png','asset/tree-snow.png','asset/tree-desert.png','asset/tree-swamp.png','asset/tree-darkforest.png',
-    'asset/rock-forest.png','asset/rock-snow.png','asset/rock-desert.png','asset/rock-swamp.png','asset/rock-darkforest.png','asset/rock.png',
+    'asset/tree-forest.png','asset/tree-snow.png','asset/tree-desert.png','asset/tree-darkforest.png',
+    'asset/rock-forest.png','asset/rock-snow.png','asset/rock-desert.png','asset/rock-darkforest.png','asset/rock.png',
     'asset/gold.png','asset/apple.png','asset/bush.png','asset/mushroom.png','asset/crystal.png','asset/hive.png'
   ];
   for (const name of resources) _loadSprite(name, 'resource');
@@ -1995,9 +1995,10 @@ function _playerSprite(skin) {
 }
 function _resourceSprite(type, biome) {
   let name;
-  if (type === 'wood') name = `asset/tree-${biome || 'forest'}.png`;
+  const assetBiome = biome === 'winter' ? 'snow' : biome === 'lava' ? 'darkforest' : (biome || 'forest');
+  if (type === 'wood') name = `asset/tree-${assetBiome}.png`;
   else if (type === 'apple') name = 'asset/apple.png';
-  else if (type === 'stone') name = `asset/rock-${biome || 'forest'}.png`;
+  else if (type === 'stone') name = `asset/rock-${assetBiome}.png`;
   else name = `asset/${type}.png`;
   let entry = _RESOURCE_SPRITES.get(name);
   if (!entry) entry = _loadSprite(name, 'resource');
@@ -3576,8 +3577,8 @@ const _TURRET_RANGES    = [340,380,420,470,530,600];
 const _TURRET_COOLDOWNS = [70,60,50,40,30,20];
 
 // Zone label cached data — avoids allocating a new array literal every frame
-const _ZONE_LABEL_STRS = ['❄️ KAR','☀️ ÇÖL','☘️ BATAKLIK','☠️ ZEHİR','🌿 ORMAN'];
-const _ZONE_LABEL_MULS = [[0,-1],[1,0],[0,1],[-1,0],[0,0]];
+const _ZONE_LABEL_STRS = ['❄️ KIŞ','☀️ ÇÖL','🔥 LAV','🌿 ORMAN'];
+const _ZONE_LABEL_MULS = [[0,-1],[1,0],[0,1],[-1,0]];
 // PERF: Pre-built 256-step building HP bar color table — avoids rgb(${...}) string alloc per frame
 // Replaces 3-branch template literal that ran for every visible damaged building every frame.
 const _bHpColors = (function() {
@@ -4400,7 +4401,7 @@ function drawRankBadge12(ctx, cx, cy, rankId, size, t) {
 
   // Outer dark shell (unique shade per rank group)
   ctx.fillStyle = rid <= 2 ? '#0a0a0a' : rid <= 5 ? '#060810' : rid <= 8 ? '#08040e' : '#040408';
-  _drawDodecagon(ctx, r + 2.8);
+  _drawDodecagon(ctx, r + 1.5);
   ctx.fill();
   ctx.shadowBlur = 0;
 
@@ -4411,12 +4412,12 @@ function drawRankBadge12(ctx, cx, cy, rankId, size, t) {
 
   // Border — thinner and cleaner for better readability
   ctx.strokeStyle=cb;
-  ctx.lineWidth=rid<=2?1.1:rid<=6?1.3:rid<=9?1.5:1.7;
+  ctx.lineWidth=rid<=2?0.8:rid<=6?1.0:rid<=9?1.15:1.3;
   _drawDodecagon(ctx,r);ctx.stroke();
 
   // Inner trim ring
   const trimA=[0.18,0.12,0.18,0.22,0.28,0.30,0.32,0.35,0.28,0.22,0.35,0.42][rid];
-  ctx.strokeStyle=`rgba(255,255,255,${trimA})`;ctx.lineWidth=0.8;
+  ctx.strokeStyle=`rgba(255,255,255,${trimA})`;ctx.lineWidth=0.6;
   _drawDodecagon(ctx,r*0.68);ctx.stroke();
 
   // Top-left shine overlay — CACHED
@@ -4458,9 +4459,9 @@ function drawRankBadge12(ctx, cx, cy, rankId, size, t) {
 // ── Name tag: [badge] PlayerName / RankName ──────────────────
 function drawNameTag12(ctx, wx, wy, name, rankId, hpRatio, isOwn, t) {
   const rid = Math.max(0, Math.min(11, (rankId|0)));
-  const BR  = isOwn ? 7 : 6;    // badge radius — compacted
-  const FS  = isOwn ? 8 : 7;    // name font size — compacted
-  const GAP = 2;                // tiny gap between name and badge
+  const BR  = isOwn ? 8 : 7;
+  const FS  = isOwn ? 9 : 8;
+  const GAP = 5;
 
   ctx.save();
   ctx.font = `900 ${FS}px Arial`;
@@ -4473,7 +4474,7 @@ function drawNameTag12(ctx, wx, wy, name, rankId, hpRatio, isOwn, t) {
   const nameX = lx;
   const nameCol = isOwn ? '#ffffff' : (hpRatio < 0.30 ? '#ff7777' : '#ffffff');
   ctx.strokeStyle = 'rgba(0,0,0,0.80)';
-  ctx.lineWidth = 1.8;
+  ctx.lineWidth = 1.25;
   ctx.textAlign = 'left';
   ctx.strokeText(name, nameX, wy);
   ctx.fillStyle = nameCol;
@@ -4499,7 +4500,7 @@ function _drawNameTagCached(ctx, sx, sy, name, rankId, hpRatio, isOwn, t) {
   let entry = _NT_OC_CACHE.get(key);
   if (!entry) {
     // Measure text to size the OC exactly (no padding waste)
-    const BR = isOwn ? 7 : 6, FS = isOwn ? 8 : 7, GAP = 2;
+    const BR = isOwn ? 8 : 7, FS = isOwn ? 9 : 8, GAP = 5;
     _NT_MEAS_CTX.font = '900 ' + FS + 'px Arial';
     const tw = _NT_MEAS_CTX.measureText(name).width;
     const totalW = tw + GAP + BR * 2 + 2;
@@ -17296,304 +17297,97 @@ function _drawBossBody(ctx,c,bs,t){
 
 <script>
 /* ═══════════════════════════════════════════════════
-   INVENTORY CANVAS ICONS — animated, canvas-drawn
+   INVENTORY CANVAS ICONS — real in-game resource/weapon art
    ═══════════════════════════════════════════════════ */
 (function(){
 'use strict';
-var _IC={}, _IT={};
+
+var _IC = {}, _IT = {};
 function _initIC(){
-  for(var i=1;i<=10;i++){
-    var cv=document.getElementById('icanv-'+i);
-    if(cv){_IC[i]=cv;_IT[i]=cv.getContext('2d');}
-  }
-}
-
-var _TIER_CLR=[
-  ['#bdbdbd','#9e9e9e'],['#ffd740','#ff9800'],
-  ['#82b1ff','#448aff'],['#a78bfa','#7c3aed'],
-  ['#34d399','#059669'],['#f87171','#dc2626']
-];
-function _tClr(tier){ var t=_TIER_CLR[Math.min(tier||0,5)]; return {a:t[0],b:t[1]}; }
-
-/* ── GRADIENT CACHE: attached to context, created once ── */
-function _getGrad(c,key,makeGrad){
-  if(!c._gc) c._gc={};
-  if(!c._gc[key]) c._gc[key]=makeGrad(c);
-  return c._gc[key];
-}
-/* Tier-keyed gradient (recreates if tier changes) */
-function _getTierGrad(c,key,tier,makeGrad){
-  if(!c._gc) c._gc={};
-  var tk=key+'_'+tier;
-  if(!c._gc[tk]) c._gc[tk]=makeGrad(c,tier);
-  return c._gc[tk];
-}
-
-/* ── 1. BALTA (Axe) ── */
-function _drawAxeIcon(c,t,tier){
-  var W=40;c.clearRect(0,0,W,W);c.save();c.translate(20,20);
-  var sway=Math.sin(t*1.2)*0.15;c.rotate(sway);
-  var cl=_tClr(tier);
-  var hg=_getTierGrad(c,'axeH',tier,function(ctx){
-    var g=ctx.createLinearGradient(-4,-18,4,0);
-    g.addColorStop(0,cl.a);g.addColorStop(1,cl.b);return g;
-  });
-  c.fillStyle=hg;c.strokeStyle='#333';c.lineWidth=1.5;
-  c.beginPath();c.moveTo(-5,0);c.lineTo(-2,-16);c.lineTo(2,-16);c.lineTo(5,0);c.closePath();
-  c.fill();c.stroke();
-  c.fillStyle=_getGrad(c,'axeM',function(ctx){
-    var g=ctx.createLinearGradient(-12,-12,12,-2);
-    g.addColorStop(0,'#e0e0e0');g.addColorStop(0.5,'#9e9e9e');g.addColorStop(1,'#616161');return g;
-  });
-  c.strokeStyle='#263238';c.lineWidth=1.8;
-  c.beginPath();c.moveTo(-12,-12);c.quadraticCurveTo(-14,-6,-11,-2);c.lineTo(11,-2);c.quadraticCurveTo(14,-6,12,-12);c.closePath();
-  c.fill();c.stroke();
-  c.fillStyle='rgba(255,255,255,0.25)';c.beginPath();c.moveTo(-9,-11);c.quadraticCurveTo(-11,-7,-9,-4);c.lineTo(-4,-4);c.quadraticCurveTo(-6,-7,-5,-11);c.fill();
-  c.restore();
-}
-
-/* ── 2. KILIC (Sword) ── */
-function _drawSwordIcon(c,t,tier){
-  var W=40;c.clearRect(0,0,W,W);c.save();c.translate(20,20);
-  var sway=Math.sin(t*1.1)*0.12;c.rotate(-Math.PI/4+sway);
-  var cl=_tClr(tier);
-  c.fillStyle=_getTierGrad(c,'swBlade',tier,function(ctx){
-    var g=ctx.createLinearGradient(-2,-18,2,18);
-    g.addColorStop(0,cl.a);g.addColorStop(0.5,cl.b);g.addColorStop(1,cl.a);return g;
-  });
-  c.strokeStyle='#333';c.lineWidth=1.5;
-  c.beginPath();c.moveTo(-2.5,-18);c.lineTo(2.5,-18);c.lineTo(1.5,10);c.lineTo(-1.5,10);c.closePath();
-  c.fill();c.stroke();
-  c.fillStyle=_getGrad(c,'swGuard',function(ctx){
-    var g=ctx.createLinearGradient(-10,-2,10,2);
-    g.addColorStop(0,'#9e9e9e');g.addColorStop(0.5,'#e0e0e0');g.addColorStop(1,'#9e9e9e');return g;
-  });
-  c.strokeStyle='#424242';c.lineWidth=1.5;
-  c.beginPath();c.roundRect(-10,-3,20,6,2);c.fill();c.stroke();
-  c.fillStyle=_getGrad(c,'swGrip',function(ctx){
-    var g=ctx.createLinearGradient(-2,10,2,18);
-    g.addColorStop(0,'#5d4037');g.addColorStop(1,'#3e2723');return g;
-  });
-  c.strokeStyle='#212121';c.lineWidth=1.2;
-  c.beginPath();c.roundRect(-3,10,6,10,3);c.fill();c.stroke();
-  c.fillStyle='rgba(255,255,255,0.2)';c.beginPath();c.moveTo(-1.5,-16);c.lineTo(0.5,-16);c.lineTo(-0.5,6);c.lineTo(-1.5,6);c.fill();
-  c.restore();
-}
-
-/* ── 3. KAZIK (Spike) ── */
-function _drawSpikeIcon(c,t){
-  var W=40;c.clearRect(0,0,W,W);c.save();c.translate(20,20);
-  var bob=Math.sin(t*2)*1.5;c.translate(0,bob);
-  c.fillStyle=_getGrad(c,'spBase',function(ctx){
-    var g=ctx.createLinearGradient(-12,0,12,10);
-    g.addColorStop(0,'#78909c');g.addColorStop(1,'#37474f');return g;
-  });
-  c.strokeStyle='#263238';c.lineWidth=1.5;
-  c.beginPath();c.roundRect(-12,2,24,10,3);c.fill();c.stroke();
-  for(var s=0;s<5;s++){
-    var sx=-10+s*5;
-    c.fillStyle=_getGrad(c,'spTip',function(ctx){
-      var g=ctx.createLinearGradient(-2,-14,2,0);
-      g.addColorStop(0,'#e0e0e0');g.addColorStop(1,'#9e9e9e');return g;
-    });
-    c.strokeStyle='#263238';c.lineWidth=1;
-    c.beginPath();c.moveTo(sx,-14);c.lineTo(sx-2.5,2);c.lineTo(sx+2.5,2);c.closePath();c.fill();c.stroke();
-    c.fillStyle='rgba(255,255,255,0.3)';c.beginPath();c.moveTo(sx,-12);c.lineTo(sx-0.5,0);c.lineTo(sx+0.5,0);c.fill();
-  }
-  c.restore();
-}
-
-/* ── 4. DEGIRMEN (Windmill) ── */
-function _drawWindmillIcon(c,t){
-  var W=40;c.clearRect(0,0,W,W);c.save();c.translate(20,20);
-  var snap=t*2.5;
-  for(var i=0;i<4;i++){
-    c.save();c.rotate(i*Math.PI/2+snap);
-    c.fillStyle=_getGrad(c,'wmBlade',function(ctx){
-      var g=ctx.createLinearGradient(-4,2,4,18);
-      g.addColorStop(0,'#90caf9');g.addColorStop(1,'#1565c0');return g;
-    });
-    c.strokeStyle='#0d47a1';c.lineWidth=1;
-    c.beginPath();c.moveTo(-4,2);c.lineTo(4,2);c.lineTo(3.5,18);c.lineTo(-3.5,18);c.closePath();
-    c.fill();c.stroke();
-    c.fillStyle='rgba(255,255,255,0.2)';c.beginPath();c.moveTo(-2,4);c.lineTo(2,4);c.lineTo(1.5,14);c.lineTo(-1.5,14);c.fill();
-    c.restore();
-  }
-  c.fillStyle=_getGrad(c,'wmHub',function(ctx){
-    var g=ctx.createRadialGradient(-2,-2,0,0,0,7);
-    g.addColorStop(0,'#e3f2fd');g.addColorStop(1,'#1976d2');return g;
-  });
-  c.strokeStyle='#0d47a1';c.lineWidth=1.5;
-  c.beginPath();c.arc(0,0,7,0,Math.PI*2);c.fill();c.stroke();
-  c.restore();
-}
-
-/* ── 5. HIZ PEDI (Boost) ── */
-function _drawBoostIcon(c,t){
-  var W=40;c.clearRect(0,0,W,W);c.save();c.translate(20,20);
-  var pulse=0.92+Math.sin(t*3)*0.08;c.scale(pulse,pulse);
-  c.fillStyle=_getGrad(c,'bstPad',function(ctx){
-    var g=ctx.createLinearGradient(-14,-8,14,8);
-    g.addColorStop(0,'#69f0ae');g.addColorStop(1,'#00695c');return g;
-  });
-  c.strokeStyle='#004d40';c.lineWidth=2;
-  c.beginPath();c.roundRect(-14,-8,28,16,8);c.fill();c.stroke();
-  c.fillStyle='rgba(255,255,255,0.85)';c.strokeStyle='rgba(0,100,60,0.6)';c.lineWidth=1.2;
-  for(var a=0;a<3;a++){
-    var ax=-7+a*7;
-    c.beginPath();c.moveTo(ax,-5);c.lineTo(ax+4,0);c.lineTo(ax,-5+10);c.closePath();c.fill();c.stroke();
-  }
-  c.restore();
-}
-
-/* ── 6. TUZAK (Trap) ── */
-function _drawTrapIcon(c,t){
-  var W=40;c.clearRect(0,0,W,W);c.save();c.translate(20,20);
-  var snap=t*2.5;
-  c.fillStyle=_getGrad(c,'trpBody',function(ctx){
-    var g=ctx.createLinearGradient(-14,-6,14,6);
-    g.addColorStop(0,'#ef9a9a');g.addColorStop(1,'#c62828');return g;
-  });
-  c.strokeStyle='#b71c1c';c.lineWidth=1.5;
-  c.beginPath();c.roundRect(-14,-5,28,10,5);c.fill();c.stroke();
-  for(var i=0;i<4;i++){
-    c.save();c.rotate(i*Math.PI/2+snap);
-    c.beginPath();c.moveTo(-4,8);c.lineTo(0,16);c.lineTo(4,8);c.closePath();c.fill();c.stroke();
-    c.restore();
-  }
-  var gp=0.3+Math.abs(Math.sin(t*2.5))*0.4;
-  c.fillStyle='rgba(200,0,0,'+gp+')';c.beginPath();c.arc(0,0,5,0,Math.PI*2);c.fill();
-  c.fillStyle='rgba(255,100,100,0.5)';c.beginPath();c.arc(-1,-1,2,0,Math.PI*2);c.fill();
-  c.restore();
-}
-
-/* ── 7. TARET (Turret) ── */
-function _drawTurretIcon(c,t){
-  var W=40;c.clearRect(0,0,W,W);c.save();c.translate(20,20);
-  c.fillStyle='#546e7a';c.strokeStyle='#263238';c.lineWidth=2;
-  c.beginPath();
-  for(var i=0;i<6;i++){var a=i*Math.PI/3-Math.PI/6;c.lineTo(Math.cos(a)*14,Math.sin(a)*14);}
-  c.closePath();c.fill();c.stroke();
-  c.save();c.rotate(Math.sin(t*0.55)*0.22);
-  c.fillStyle='#37474f';c.strokeStyle='#1a2327';c.lineWidth=1.5;
-  c.beginPath();c.roundRect(-4,-3,20,6,2);c.fill();c.stroke();
-  c.fillStyle='#263238';c.strokeStyle='#111';c.lineWidth=1.5;
-  c.beginPath();c.roundRect(14,-4,6,8,1);c.fill();c.stroke();
-  c.restore();
-  c.fillStyle=_getGrad(c,'turHub',function(ctx){
-    var g=ctx.createRadialGradient(-2,-2,0,0,0,8);
-    g.addColorStop(0,'#90a4ae');g.addColorStop(1,'#455a64');return g;
-  });
-  c.strokeStyle='#263238';c.lineWidth=1.5;
-  c.beginPath();c.arc(0,0,8,0,Math.PI*2);c.fill();c.stroke();
-  c.restore();
-}
-
-/* ── 8. DUVAR (Wall) — bricks drawn once into offscreen cache ── */
-var _wallOC=null, _wallCached=false;
-function _ensureWallCache(c){
-  if(_wallCached) return;
-  _wallCached=true;
-  try{
-    _wallOC=document.createElement('canvas');_wallOC.width=40;_wallOC.height=40;
-    var wc=_wallOC.getContext('2d');
-    wc.save();wc.translate(20,20);
-    wc.fillStyle='rgba(0,0,0,0.3)';wc.beginPath();wc.roundRect(-15,-12,30,26,3);wc.fill();
-    var wg=wc.createLinearGradient(-13,-11,13,13);
-    wg.addColorStop(0,'#bdbdbd');wg.addColorStop(0.5,'#9e9e9e');wg.addColorStop(1,'#757575');
-    wc.fillStyle=wg;wc.strokeStyle='#424242';wc.lineWidth=1.5;
-    wc.beginPath();wc.roundRect(-14,-11,28,24,3);wc.fill();wc.stroke();
-    wc.fillStyle='#878787';wc.strokeStyle='#555';wc.lineWidth=0.7;
-    var bricks=[[-12,-8,9,6],[-1,-8,9,6],[10,-8,4,6],
-                [-14,-1,5,6],[-7,-1,9,6],[4,-1,9,6],
-                [-12,7,9,6],[-1,7,9,6],[10,7,4,6]];
-    for(var bi=0;bi<bricks.length;bi++){
-      var br=bricks[bi];wc.beginPath();wc.roundRect(br[0],br[1],br[2],br[3],1);wc.fill();wc.stroke();
+  for (var i = 1; i <= 10; i++) {
+    var cv = document.getElementById('icanv-' + i);
+    if (cv) {
+      _IC[i] = cv;
+      _IT[i] = cv.getContext('2d');
     }
-    wc.restore();
-  }catch(e){_wallOC=null;}
-}
-function _drawWallIcon(c,t){
-  var W=40;c.clearRect(0,0,W,W);
-  _ensureWallCache(c);
-  if(_wallOC){ c.drawImage(_wallOC,0,0); return; }
-  // Fallback: simplified draw without cache
-  c.save();c.translate(20,20);
-  c.fillStyle='#9e9e9e';c.strokeStyle='#424242';c.lineWidth=1.5;
-  c.beginPath();c.roundRect(-14,-11,28,24,3);c.fill();c.stroke();
-  c.restore();
+  }
 }
 
-/* ── 9. KALE (Castle) ── */
-function _drawCastleIcon(c,t){
-  var W=40;c.clearRect(0,0,W,W);c.save();c.translate(20,20);
-  c.fillStyle='rgba(0,0,0,0.25)';c.beginPath();c.ellipse(0,18,12,4,0,0,Math.PI*2);c.fill();
-  c.fillStyle=_getGrad(c,'castBody',function(ctx){
-    var g=ctx.createLinearGradient(-10,-16,10,18);
-    g.addColorStop(0,'#bdbdbd');g.addColorStop(0.5,'#9e9e9e');g.addColorStop(1,'#757575');return g;
-  });
-  c.strokeStyle='#424242';c.lineWidth=1.5;
-  c.beginPath();c.rect(-10,-16,20,34);c.fill();c.stroke();
-  c.fillStyle='#9e9e9e';c.strokeStyle='#424242';c.lineWidth=1.5;
-  for(var bi=0;bi<3;bi++){c.beginPath();c.rect(-9+bi*7,-24,5,10);c.fill();c.stroke();}
-  var wa=0.45+Math.sin(t*1.5)*0.15;
-  c.fillStyle='rgba(30,120,220,'+wa+')';c.strokeStyle='#333';c.lineWidth=1;
-  c.beginPath();c.roundRect(-4,-11,8,9,2);c.fill();c.stroke();
-  c.fillStyle='rgba(200,230,255,0.3)';c.beginPath();c.rect(-3,-10,3,7);c.fill();
-  c.fillStyle='rgba(70,35,10,0.85)';c.strokeStyle='#333';c.lineWidth=1;
-  c.beginPath();c.roundRect(-4,4,8,14,3,3,0,0);c.fill();c.stroke();
-  c.restore();
+function _drawSlotBase(ctx){
+  var W = 40;
+  ctx.clearRect(0,0,W,W);
+  ctx.fillStyle = 'rgba(12,18,24,0.45)';
+  ctx.fillRect(2,2,36,36);
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(3,3,34,34);
 }
 
-/* ── 10. YAY (Bow) ── */
-function _drawBowIcon(c,t){
-  var W=40;c.clearRect(0,0,W,W);c.save();
-  c.translate(20,20);c.rotate(-Math.PI/4);
-  var pull=Math.sin(t*1.6)*2.5;
-  c.strokeStyle='#8B4513';c.lineWidth=3.5;c.lineCap='round';
-  c.beginPath();c.moveTo(0,-17);c.quadraticCurveTo(pull-12,0,0,17);c.stroke();
-  c.strokeStyle='#e0d0a0';c.lineWidth=1;
-  c.beginPath();c.moveTo(0,-17);c.lineTo(pull,0);c.lineTo(0,17);c.stroke();
-  c.strokeStyle='#cd853f';c.lineWidth=2;c.lineCap='round';
-  c.beginPath();c.moveTo(-17,0);c.lineTo(17,0);c.stroke();
-  c.fillStyle='#9ca3af';c.strokeStyle='#374151';c.lineWidth=1;
-  c.beginPath();c.moveTo(17,0);c.lineTo(11,3.5);c.lineTo(11,-3.5);c.closePath();c.fill();c.stroke();
-  c.strokeStyle='rgba(255,255,255,0.5)';c.lineWidth=0.8;
-  c.beginPath();c.moveTo(16,0);c.lineTo(12,-2);c.stroke();
-  c.strokeStyle='rgba(220,60,60,0.85)';c.lineWidth=2;c.lineCap='round';
-  c.beginPath();c.moveTo(-14,0);c.lineTo(-9,4);c.stroke();
-  c.beginPath();c.moveTo(-14,0);c.lineTo(-9,-4);c.stroke();
-  c.restore();
+function _drawSpriteToSlot(ctx, img) {
+  _drawSlotBase(ctx);
+  if (!img) return;
+  var maxW = 28, maxH = 28;
+  var scale = Math.min(maxW / (img.width || 1), maxH / (img.height || 1));
+  var w = (img.width || 28) * scale;
+  var h = (img.height || 28) * scale;
+  ctx.drawImage(img, 20 - w / 2, 20 - h / 2, w, h);
 }
 
-/* ── Event-driven Inventory Icon Rendering (Zero background CPU load) ── */
-var _lastAxeTierDrawn = -1, _lastSwordTierDrawn = -1;
-function renderInventoryIcons(force) {
+function _drawWeaponSlot(ctx, kind, tier){
+  var img = typeof _weaponSprite === 'function' ? _weaponSprite(kind, tier || 0) : null;
+  if (!img) {
+    _drawSlotBase(ctx);
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(kind === 'axe' ? 'A' : 'S', 20, 20);
+    return;
+  }
+  _drawSpriteToSlot(ctx, img);
+}
+
+function _slotDef(slotIndex){
+  if (slotIndex === 1) return { kind: 'axe', tier: (typeof _wepTier === 'function' && typeof _axeXP !== 'undefined') ? _wepTier(_axeXP) : 0 };
+  if (slotIndex === 2) return { kind: 'sword', tier: (typeof _wepTier === 'function' && typeof _swordXP !== 'undefined') ? _wepTier(_swordXP) : 0 };
+  if (slotIndex === 3) return { type: 'wood', biome: 'forest' };
+  if (slotIndex === 4) return { type: 'stone', biome: 'forest' };
+  if (slotIndex === 5) return { type: 'apple' };
+  if (slotIndex === 6) return { type: 'gold' };
+  if (slotIndex === 7) return { type: 'bush' };
+  if (slotIndex === 8) return { type: 'rock' };
+  if (slotIndex === 9) return { type: 'crystal' };
+  if (slotIndex === 10) return { type: 'apple' };
+  return null;
+}
+
+var _lastInv = {};
+function renderInventoryIcons(force){
   try {
-    if (!_IT[1]) _initIC();
-    var ts = Date.now() * 0.001;
-    var at = typeof _wepTier === 'function' && typeof _axeXP !== 'undefined' ? _wepTier(_axeXP) : 0;
-    var st = typeof _wepTier === 'function' && typeof _swordXP !== 'undefined' ? _wepTier(_swordXP) : 0;
-    if (force || at !== _lastAxeTierDrawn) {
-      if (_IT[1]) _drawAxeIcon(_IT[1], ts, at);
-      _lastAxeTierDrawn = at;
+    if (!_IC[1]) _initIC();
+    for (var i = 1; i <= 10; i++) {
+      var slot = _IC[i];
+      if (!slot) continue;
+      var ctx = _IT[i];
+      var def = _slotDef(i);
+      var key = def ? (def.kind ? 'k:' + def.kind + ':' + (def.tier || 0) : 'r:' + def.type + ':' + (def.biome || 'base')) : 'empty';
+      var redraw = force || key !== _lastInv[i];
+      if (!redraw) continue;
+      _lastInv[i] = key;
+      if (def && def.kind) {
+        _drawWeaponSlot(ctx, def.kind, def.tier);
+      } else if (def && def.type) {
+        var img = typeof _resourceSprite === 'function' ? _resourceSprite(def.type, def.biome) : null;
+        if (!img && def.type === 'wood') img = _resourceSprite('wood', 'forest');
+        if (!img && def.type === 'stone') img = _resourceSprite('stone', 'forest');
+        _drawSpriteToSlot(ctx, img);
+      } else {
+        _drawSlotBase(ctx);
+      }
     }
-    if (force || st !== _lastSwordTierDrawn) {
-      if (_IT[2]) _drawSwordIcon(_IT[2], ts, st);
-      _lastSwordTierDrawn = st;
-    }
-    if (force) {
-      if (_IT[3]) _drawSpikeIcon(_IT[3], ts);
-      if (_IT[4]) _drawWindmillIcon(_IT[4], ts);
-      if (_IT[5]) _drawBoostIcon(_IT[5], ts);
-      if (_IT[6]) _drawTrapIcon(_IT[6], ts);
-      if (_IT[7]) _drawTurretIcon(_IT[7], ts);
-      if (_IT[8]) _drawWallIcon(_IT[8], ts);
-      if (_IT[9]) _drawCastleIcon(_IT[9], ts);
-      if (_IT[10]) _drawBowIcon(_IT[10], ts);
-    }
-  } catch(e) {}
+  } catch (e) {}
 }
+
 window.renderInventoryIcons = renderInventoryIcons;
 _initIC();
 renderInventoryIcons(true);
