@@ -80,7 +80,7 @@ body>iframe,body>[id^="replit"],body>[class^="replit"]{
   position:fixed!important;top:0!important;left:0!important;
 }
 /* Nuke any injected divs not in our game keep list */
-body>div:not(#ui-top):not(#ui-bottom):not(#top-hud):not(#bottom-hud):not(#kill-feed):not(#dmg-flash):not(#upgrade-overlay):not(#upg-backdrop):not(#upg-notify-btn):not(#death-overlay):not(#spawn-overlay):not(#lb-panel):not(#inv-bar):not(#joy-left):not(#joy-right):not(#minimap):not(#toast):not(#biome-indicator):not(#ping-display):not(#fps-display):not(#res-panel):not(#kill-flash):not(#kill-notif):not(#rage-overlay):not(#event-banner):not(#streak-hud):not(#shield-hud):not(#lvlup-flash):not(#tab-scoreboard):not(#quick-chat-wheel):not(#build-upg-panel):not(#train-btn):not(#train-stop-hud):not(#loading-screen):not(#tutorial-overlay):not(#quest-panel):not(#ach-popup):not(#spectator-hud):not(#invite-hud-btn):not(#event-meteor-banner):not(#snap-settings-panel):not(#clan-game-panel){
+body>div:not(#ui-top):not(#ui-bottom):not(#top-hud):not(#bottom-hud):not(#kill-feed):not(#dmg-flash):not(#upgrade-overlay):not(#upg-backdrop):not(#upg-notify-btn):not(#death-overlay):not(#spawn-overlay):not(#lb-panel):not(#inv-bar):not(#joy-left):not(#joy-right):not(#minimap):not(#toast):not(#biome-indicator):not(#ping-display):not(#fps-display):not(#res-panel):not(#resource-hud):not(#kill-flash):not(#kill-notif):not(#rage-overlay):not(#event-banner):not(#streak-hud):not(#shield-hud):not(#lvlup-flash):not(#tab-scoreboard):not(#quick-chat-wheel):not(#build-upg-panel):not(#train-btn):not(#train-stop-hud):not(#loading-screen):not(#tutorial-overlay):not(#quest-panel):not(#ach-popup):not(#spectator-hud):not(#invite-hud-btn):not(#event-meteor-banner):not(#snap-settings-panel):not(#clan-game-panel){
   display:none!important;pointer-events:none!important;
   position:fixed!important;top:0!important;left:0!important;
   width:0!important;height:0!important;max-width:0!important;max-height:0!important;
@@ -114,6 +114,25 @@ body>iframe[style]{
   display:flex;align-items:flex-start;justify-content:space-between;
   padding:max(env(safe-area-inset-top,0px),8px) max(env(safe-area-inset-right,0px),10px) 0 max(env(safe-area-inset-left,0px),10px);
   pointer-events:none;
+}
+
+#resource-hud{
+  position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:130;display:flex !important;align-items:center;justify-content:center;gap:8px;padding:6px 10px;border-radius:16px;background:rgba(8,13,18,0.68);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.12);box-shadow:0 8px 20px rgba(0,0,0,0.25);visibility:visible !important;opacity:1 !important;width:auto !important;height:auto !important;max-width:none !important;max-height:none !important;pointer-events:auto !important;
+}
+.res-item{
+  display:flex;align-items:center;gap:6px;background:linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.09);padding:6px 10px;border-radius:12px;min-width:82px;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.res-item.wood .res-icon{color:#65d970;}
+.res-item.stone .res-icon{color:#c6d0db;}
+.res-item.gold .res-icon{color:#ffd64d;}
+.res-item.apple .res-icon{color:#ff7b7b;}
+.res-icon{font-size:16px;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.32));}
+.res-value{font-size:12px;font-weight:900;letter-spacing:0.5px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.7);}
+@media (max-width: 760px) and (orientation: portrait), (max-width: 900px) and (orientation: landscape){
+  #resource-hud{top:58px;left:50%;transform:translateX(-50%);gap:6px;padding:4px 6px;}
+  .res-item{min-width:68px;padding:5px 7px;border-radius:10px;}
+  .res-icon{font-size:14px;}
+  .res-value{font-size:11px;}
 }
 
 /* ===== RESOURCES PANEL — top-left horizontal bar (moomoo.io style) ===== */
@@ -1378,6 +1397,13 @@ function drawSkinEyesOverlay(c, R, sk, fl) {
 <!-- FPS DISPLAY — shown below res-panel on left side, always visible once game loads -->
 <div id="fps-display" style="position:fixed;top:56px;left:10px;z-index:901;background:rgba(0,0,0,0.72);border:1.5px solid rgba(255,255,255,0.22);border-radius:8px;padding:5px 13px;font-size:14px;font-weight:900;color:#44ff88;font-family:monospace;cursor:pointer;min-width:80px;text-align:center;letter-spacing:0.5px;text-shadow:0 1px 3px #000;" onclick="document.getElementById('perf-panel').style.display=document.getElementById('perf-panel').style.display==='none'?'block':'none'">⚡ -- FPS</div>
 <div id="perf-panel" style="display:none;position:fixed;top:98px;left:10px;z-index:901;background:rgba(0,0,0,0.88);border:1.5px solid rgba(255,255,255,0.18);border-radius:10px;padding:10px 13px;font-size:11px;font-family:monospace;color:#ddd;pointer-events:none;width:260px;line-height:1.65;box-shadow:0 4px 18px rgba(0,0,0,0.7);"></div>
+
+<div id="resource-hud" aria-label="Kaynak durumu">
+  <div class="res-item wood"><span class="res-icon">🌲</span><span id="wood-count" class="res-value">0</span></div>
+  <div class="res-item stone"><span class="res-icon">🪨</span><span id="stone-count" class="res-value">0</span></div>
+  <div class="res-item gold"><span class="res-icon">💰</span><span id="gold-count" class="res-value">0</span></div>
+  <div class="res-item apple"><span class="res-icon">🍎</span><span id="apple-count" class="res-value">0</span></div>
+</div>
 
 <!-- TOP BAR: buttons (top-right) -->
 <div id="ui-top">
@@ -15299,10 +15325,11 @@ setTimeout(_safeDismissLoading, 1200); // Safety fallback
   fixCanvas();
 
   /* 4. NUCLEAR: Replit badge + enjekte elementleri tamamen kapat */
-  var _KEEP={gameCanvas:1,minimap:1,'kill-feed':1,'dmg-flash':1,'upgrade-overlay':1,'upg-backdrop':1,'upg-notify-btn':1,'death-overlay':1,'spawn-overlay':1,'top-hud':1,'bottom-hud':1,'joy-left':1,'joy-right':1,'inv-bar':1,'lb-panel':1,'ui-top':1,'ui-bottom':1,'toast':1,'boss-bar':1,'biome-indicator':1,'ping-display':1,'fps-display':1,'res-panel':1,'build-upg-panel':1,'kill-flash':1,'kill-notif':1,'rage-overlay':1,'event-banner':1,'streak-hud':1,'shield-hud':1,'lvlup-flash':1,'tab-scoreboard':1,'quick-chat-wheel':1,'train-btn':1,'train-stop-hud':1,'loading-screen':1,'tutorial-overlay':1,'quest-panel':1,'ach-popup':1,'spectator-hud':1,'invite-hud-btn':1,'event-meteor-banner':1,'dash-btn':1,'snap-settings-panel':1,'clan-game-btn':1,'clan-game-panel':1};
+  var _KEEP={gameCanvas:1,minimap:1,'kill-feed':1,'dmg-flash':1,'upgrade-overlay':1,'upg-backdrop':1,'upg-notify-btn':1,'death-overlay':1,'spawn-overlay':1,'top-hud':1,'bottom-hud':1,'joy-left':1,'joy-right':1,'inv-bar':1,'lb-panel':1,'ui-top':1,'ui-bottom':1,'toast':1,'boss-bar':1,'biome-indicator':1,'ping-display':1,'fps-display':1,'res-panel':1,'resource-hud':1,'build-upg-panel':1,'kill-flash':1,'kill-notif':1,'rage-overlay':1,'event-banner':1,'streak-hud':1,'shield-hud':1,'lvlup-flash':1,'tab-scoreboard':1,'quick-chat-wheel':1,'train-btn':1,'train-stop-hud':1,'loading-screen':1,'tutorial-overlay':1,'quest-panel':1,'ach-popup':1,'spectator-hud':1,'invite-hud-btn':1,'event-meteor-banner':1,'dash-btn':1,'snap-settings-panel':1,'clan-game-btn':1,'clan-game-panel':1};
   function _nukeEl(el){
     if(!el||el.nodeType!==1) return;
     var t=el.tagName;
+    if (el.id === 'resource-hud') return;
     if(t==='SCRIPT'||t==='STYLE'||t==='META'||t==='LINK'||t==='CANVAS'||t==='INPUT'||t==='TEXTAREA'||_KEEP[el.id]) return;
     var s=el.style;
     s.setProperty('display','none','important');s.setProperty('width','0','important');
@@ -15311,6 +15338,23 @@ setTimeout(_safeDismissLoading, 1200); // Safety fallback
     s.setProperty('clip-path','inset(100%)','important');s.setProperty('pointer-events','none','important');
     s.setProperty('visibility','hidden','important');s.setProperty('opacity','0','important');
     s.setProperty('position','fixed','important');s.setProperty('top','0','important');s.setProperty('left','0','important');
+  }
+  function _restoreResourceHud(){
+    var hud = document.getElementById('resource-hud');
+    if (!hud) return;
+    hud.style.setProperty('display','flex','important');
+    hud.style.setProperty('visibility','visible','important');
+    hud.style.setProperty('opacity','1','important');
+    hud.style.setProperty('width','auto','important');
+    hud.style.setProperty('height','auto','important');
+    hud.style.setProperty('max-width','none','important');
+    hud.style.setProperty('max-height','none','important');
+    hud.style.setProperty('pointer-events','auto','important');
+    hud.style.setProperty('left','50%','important');
+    hud.style.setProperty('top','10px','important');
+    hud.style.setProperty('overflow','visible','important');
+    hud.style.setProperty('clip-path','none','important');
+    hud.style.setProperty('position','fixed','important');
   }
   function _sweepBadge(){
     [].forEach.call(document.body.children, _nukeEl);
@@ -15321,8 +15365,32 @@ setTimeout(_safeDismissLoading, 1200); // Safety fallback
   }
   _sweepBadge();
   [100,500,1500,3500].forEach(function(t){ setTimeout(_sweepBadge,t); });
-  new MutationObserver(function(muts){ muts.forEach(function(m){ m.addedNodes.forEach(_nukeEl); }); })
-    .observe(document.body,{childList:true});
+  function _restoreResourceHud(){
+    var hud = document.getElementById('resource-hud');
+    if (!hud) return;
+    hud.style.setProperty('display','flex','important');
+    hud.style.setProperty('visibility','visible','important');
+    hud.style.setProperty('opacity','1','important');
+    hud.style.setProperty('width','auto','important');
+    hud.style.setProperty('height','auto','important');
+    hud.style.setProperty('max-width','none','important');
+    hud.style.setProperty('max-height','none','important');
+    hud.style.setProperty('pointer-events','auto','important');
+    hud.style.setProperty('left','50%','important');
+    hud.style.setProperty('top','10px','important');
+  }
+  _restoreResourceHud();
+  [120,320,800,1600,2600].forEach(function(t){ setTimeout(_restoreResourceHud,t); });
+  var _hudObserver = new MutationObserver(function(muts){
+    if (!document.getElementById('resource-hud')) return;
+    _restoreResourceHud();
+    muts.forEach(function(m){
+      for (var i = 0; i < (m.addedNodes || []).length; i++) {
+        _nukeEl(m.addedNodes[i]);
+      }
+    });
+  });
+  _hudObserver.observe(document.body,{childList:true,subtree:true});
 })();
 
 // =====================================================================
