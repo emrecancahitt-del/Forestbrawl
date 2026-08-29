@@ -1495,30 +1495,6 @@ function drawSkinEyesOverlay(c, R, sk, fl) {
   </div>
 </div>
 
-<!-- RESOURCES PANEL — fixed right side -->
-<div id="res-panel">
-  <div class="res-row" id="apple-btn" title="Q — Elma ye">
-    <img class="res-icon" src="asset/apple.png" alt="Elma">
-    <div class="res-info"><span class="res-label">Elma</span><span class="res-count" id="apple-count">10</span></div>
-  </div>
-  <div class="res-row res-wood">
-    <img class="res-icon" src="asset/tree-forest.png" alt="Odun">
-    <div class="res-info"><span class="res-label">Odun</span><span class="res-count" id="wood-count">0</span></div>
-  </div>
-  <div class="res-row res-stone">
-    <img class="res-icon" src="asset/rock-forest.png" alt="Taş">
-    <div class="res-info"><span class="res-label">Taş</span><span class="res-count" id="stone-count">0</span></div>
-  </div>
-  <div class="res-row res-gold">
-    <img class="res-icon" src="asset/gold.png" alt="Altın">
-    <div class="res-info"><span class="res-label">Altın</span><span class="res-count" id="gold-count">0</span></div>
-  </div>
-  <div class="res-row res-score">
-    <span class="res-emoji">⭐</span>
-    <div class="res-info"><span class="res-count" id="score-count" style="color:#ffd700">0</span></div>
-  </div>
-</div>
-
 <!-- BOTTOM CENTER: HP + XP + Inventory -->
 <div id="ui-bottom">
   <div id="hp-wrap">
@@ -1979,6 +1955,8 @@ function _preloadStaticSprites() {
   for (const kind of ['axe', 'sword']) {
     for (let tier = 0; tier <= 6; tier++) _loadSprite(`weapons/${kind}-tier-${tier}.png`, 'weapon');
   }
+  _loadSprite('mobs/spider-46.png', 'mob');
+  _loadSprite('mobs/elephant-68.png', 'mob');
 }
 function _mobSprite(shape, radius) {
   const exactKey = `mobs/${shape}-${radius}.png`;
@@ -4043,6 +4021,16 @@ const ENEMY_TYPES = [
   { name:'Bozuk Peri',        biome:'darkforest', shape:'corruptedFairy',radius:20, hp:34, maxHp:34,  color:'#381058', outline:'#1a0028', dmg:12, speed:1.42, xp:14,  gold:4,  eyes:'#ff00ff', aggroRange:280, ranged:true, rangedRange:258, rangedCooldown:65, rangedDmg:10, projColor:'#ff00cc' },
 ];
 
+const ACTIVE_ENEMY_TYPES = [
+  { name:'Örümcek', biome:'forest', shape:'spider', radius:46, hp:108, maxHp:108, color:'#181028', outline:'#080410', dmg:26, speed:0.60, xp:45, gold:10, eyes:'#ff3300' },
+  { name:'Kurt', biome:'forest', shape:'wolf', radius:38, hp:88, maxHp:88, color:'#6b4932', outline:'#28170d', dmg:22, speed:0.84, xp:37, gold:8, eyes:'#ffcc66' },
+  { name:'Fil', biome:'forest', shape:'elephant', radius:68, hp:330, maxHp:330, color:'#71808a', outline:'#26323a', dmg:38, speed:0.30, xp:110, gold:24, eyes:'#d9f3ff', typeName:'🐘' },
+];
+const ACTIVE_MOB_SHAPES = new Set(['spider', 'wolf', 'elephant']);
+function isActiveMobShape(shape) {
+  return ACTIVE_MOB_SHAPES.has(shape);
+}
+
 // ============================================================
 // AGE / XP PROGRESSION — non-linear, gets harder each age
 // ============================================================
@@ -4716,8 +4704,8 @@ function spawnEnemy() {
     const sx = Math.max(-_spawnBound, Math.min(_spawnBound, player.x + Math.cos(ang) * dist));
     const sy = Math.max(-_spawnBound, Math.min(_spawnBound, player.y + Math.sin(ang) * dist));
     const biome = getBiome(sx, sy);
-    const pool = ENEMY_TYPES.filter(t => t.biome === biome);
-    const src  = pool.length ? pool : ENEMY_TYPES;
+    if (biome !== 'forest') return;
+    const src  = ACTIVE_ENEMY_TYPES;
     const curAge  = getAge(player.xp);
     // Unlock one tier every 2 ages so higher biome enemies appear gradually
     const maxTier = Math.min(Math.floor((curAge - 1) / 2), src.length - 1);
@@ -9779,7 +9767,9 @@ function drawEnemy(e) {
     if (breathe !== 1) ctx.scale(breathe, breathe);
     ctx.rotate(angle);
     if (_mobImage) {
+      if (shape === 'elephant') ctx.globalCompositeOperation = 'screen';
       _drawCenteredSprite(ctx, _mobImage, R * 3.4);
+      ctx.globalCompositeOperation = 'source-over';
     // PERF: OffscreenCanvas mob shape cache — replaces N complex path ops with N drawImage calls.
     // Cache key encodes shape+radius+color; hitFlash bypasses (white flash must show immediately).
     // Re-renders every 6 frames (~10Hz) to capture internal animations (eye pulse, tentacle etc).
@@ -13220,6 +13210,7 @@ function initMultiplayer() {
       enemies.length = 0;
       _serverBossId = null; _serverBossName = '';
       for (const m of mobs) {
+        if (!isActiveMobShape(m.shape)) continue;
         enemies.push({ _netId: m.id, x: m.x, y: m.y, _targetX: m.x, _targetY: m.y,
           vx: m.vx||0, vy: m.vy||0,
           hp: m.hp, maxHp: m.maxHp||m.hp, radius: m.radius,
@@ -13828,7 +13819,7 @@ function initMultiplayer() {
 
   // ── New mob spawned after we joined — full visual data ────────────────
   _socket.on('mob_spawn', (m) => {
-    if (!m || !m.id) return;
+    if (!m || !m.id || !isActiveMobShape(m.shape)) return;
     const now = Date.now();
     const already = enemies.find(en => en._netId === m.id);
     if (already) return;
@@ -13860,6 +13851,7 @@ function initMultiplayer() {
     // Removal only happens via mob_dead event or periodic mob_ids full sync.
     const now = Date.now();
     for (const m of mobs) {
+      if (!isActiveMobShape(m.shape)) continue;
       const ex = _enemyLocalMap.get(m.id);
       if (ex) {
         ex._targetX = m.x; ex._targetY = m.y;

@@ -14,14 +14,9 @@ const sessions = new Map();
 const mobs = new Map();
 const mobHitCooldowns = new Map();
 const MOB_TYPES = [
-  { shape: 'goblin', color: '#5f9f35', outline: '#1e4216', eyes: '#ffee00', typeName: 'Orman Goblini', radius: 32, hp: 180, dmg: 12 },
-  { shape: 'slime', color: '#51c95b', outline: '#176b25', eyes: '#ffffff', typeName: 'Yesil Balcik', radius: 30, hp: 150, dmg: 10 },
-  { shape: 'bat', color: '#514477', outline: '#241b3e', eyes: '#ff6677', typeName: 'Magara Yarasi', radius: 28, hp: 130, dmg: 14 },
-  { shape: 'boar', color: '#9b633b', outline: '#4a2815', eyes: '#fff0c2', typeName: 'Yaban Domuzu', radius: 38, hp: 240, dmg: 16 },
-  { shape: 'mushroom', color: '#d84b35', outline: '#6d1e17', eyes: '#fff4cc', typeName: 'Zehirli Mantar', radius: 30, hp: 170, dmg: 13 },
-  { shape: 'spider', color: '#34333b', outline: '#14141a', eyes: '#ff3344', typeName: 'Orman Orumcegi', radius: 34, hp: 190, dmg: 15 },
-  { shape: 'skeleton', color: '#c9c4ad', outline: '#5e5a4d', eyes: '#ff5c3d', typeName: 'Kemik Savasci', radius: 32, hp: 210, dmg: 18 },
-  { shape: 'cobra', color: '#b56b32', outline: '#572b16', eyes: '#ffe45c', typeName: 'Col Kobrasi', radius: 30, hp: 160, dmg: 17 },
+  { shape: 'spider', color: '#181028', outline: '#080410', eyes: '#ff3300', typeName: 'Orman Orumcegi', radius: 46, hp: 108, dmg: 26 },
+  { shape: 'wolf', color: '#6b4932', outline: '#28170d', eyes: '#ffcc66', typeName: 'Kurt', radius: 38, hp: 88, dmg: 22 },
+  { shape: 'elephant', color: '#71808a', outline: '#26323a', eyes: '#d9f3ff', typeName: 'Fil', radius: 68, hp: 330, dmg: 38 },
 ];
 const dataFile = process.env.DATA_FILE || path.join(__dirname, 'forest-data.json');
 const authSecret = process.env.AUTH_SECRET || 'forestbrawl-auth-secret-change-me';
