@@ -1587,7 +1587,7 @@ function drawSkinEyesOverlay(c, R, sk, fl) {
     <div class="inv-slot" id="slot-10">
       <span class="slot-num">0</span>
       <canvas class="inv-icon-canvas" id="icanv-10" width="40" height="40"></canvas>
-      <span class="slot-label">Ok</span>
+      <span class="slot-label">Kamp Ateşi</span>
     </div>
   </div>
 </div>
@@ -1764,7 +1764,7 @@ function drawSkinEyesOverlay(c, R, sk, fl) {
 
 const canvas = document.getElementById('gameCanvas');
 // alpha:false avoids a transparent clear (cheaper). desynchronized:true causes tearing/flicker on Windows Chrome.
-const ctx = canvas.getContext('2d', { alpha: false });
+let ctx = canvas.getContext('2d', { alpha: false });
 window._perf = window._perf || {
   frameMs:0, renderMs:0, tCamps:0, tTelegraph:0, tGround:0, tBuildings:0, tPlayers:0, tEnemies:0, tParticles:0,
   ocRebuild:0, eMobs:0, ePlayers:0, eParticles:0, eProjectiles:0, eTelegraphs:0, eBuildings:0, quality:0, shadowBlurActive:0
@@ -1956,7 +1956,10 @@ function _loadSprite(name, category) {
   const image = new Image();
   image.decoding = 'async';
   const entry = { image, ready: false, failed: false };
-  image.onload = () => { entry.ready = true; entry.failed = false; };
+  image.onload = () => {
+    entry.ready = true; entry.failed = false;
+    if (typeof window.renderInventoryIcons === 'function') window.renderInventoryIcons(true);
+  };
   image.onerror = () => { entry.failed = true; entry.ready = false; };
   image.src = _BASE + name;
   _SPRITE_CACHE.set(name, entry);
@@ -5669,12 +5672,12 @@ function _buildMmBgCache() {
   bc.fillStyle = '#3a7eb8'; bc.fillRect(0, 0, S, S);
   bc.fillStyle = '#6cb545'; bc.fillRect(1, 1, S - 2, S - 2);
   bc.fillStyle = '#74b84a'; bc.fillRect(mmIn, mmIn, mmOut - mmIn, mmOut - mmIn);
-  bc.fillStyle = '#4a2c62'; bc.fillRect(1, mmIn, mmIn - 1, mmOut - mmIn);
+  bc.fillStyle = '#5a190b'; bc.fillRect(1, mmIn, mmIn - 1, mmOut - mmIn);
   bc.fillStyle = '#dcc060'; bc.fillRect(mmOut, mmIn, S - mmOut, mmOut - mmIn);
-  bc.fillStyle = '#3d6e28'; bc.fillRect(mmIn, mmOut, mmOut - mmIn, S - mmOut);
+  bc.fillStyle = '#5a190b'; bc.fillRect(mmIn, mmOut, mmOut - mmIn, S - mmOut);
   bc.fillStyle = '#e2f0fa'; bc.fillRect(mmIn, 1, mmOut - mmIn, mmIn - 1);
   bc.save();
-  bc.strokeStyle = 'rgba(30,80,140,0.55)'; bc.lineWidth = 1.2;
+  bc.strokeStyle = 'rgba(24,30,38,0.72)'; bc.lineWidth = 1.6;
   bc.beginPath();
   bc.moveTo(0, mmIn); bc.lineTo(S, mmIn);
   bc.moveTo(0, mmOut); bc.lineTo(S, mmOut);
@@ -11044,7 +11047,7 @@ function drawGroundDetailsDirect(c) {
     const _gridTile = document.createElement('canvas');
     _gridTile.width = GRID_SIZE; _gridTile.height = GRID_SIZE;
     const _gridTileCtx = _gridTile.getContext('2d');
-    _gridTileCtx.strokeStyle = 'rgba(0, 0, 0, 0.02)';
+    _gridTileCtx.strokeStyle = 'rgba(0, 0, 0, 0.075)';
     _gridTileCtx.lineWidth = 0.35;
     _gridTileCtx.beginPath();
     _gridTileCtx.moveTo(0, 0); _gridTileCtx.lineTo(GRID_SIZE, 0);
@@ -11058,13 +11061,13 @@ function drawGroundDetailsDirect(c) {
 
   // ── Biome Divider Line ──
   const B = BIOME_BORDER;
-  c.strokeStyle = 'rgba(0, 0, 0, 0.04)';
-  c.lineWidth = 1.0;
+  c.strokeStyle = 'rgba(0, 0, 0, 0.16)';
+  c.lineWidth = 2.0;
   c.strokeRect(-B, -B, B * 2, B * 2);
 
   // ── Map border walls softened to a light outline ──
-  c.strokeStyle = 'rgba(220, 45, 45, 0.30)';
-  c.lineWidth = 18;
+  c.strokeStyle = 'rgba(220, 45, 45, 0.62)';
+  c.lineWidth = 24;
   c.strokeRect(-WORLD, -WORLD, WORLD * 2, WORLD * 2);
   c.restore();
 }
@@ -17347,17 +17350,25 @@ function _drawWeaponSlot(ctx, kind, tier){
   _drawSpriteToSlot(ctx, img);
 }
 
+function _drawBuildingSlot(slotCtx, type){
+  _drawSlotBase(slotCtx);
+  if (typeof drawBuilding !== 'function') return;
+  var gameCtx = ctx;
+  try {
+    ctx = slotCtx;
+    slotCtx.save();
+    slotCtx.scale(0.5, 0.5);
+    drawBuilding({x:40,y:40,type:type,tier:0,angle:0,shake:0,hp:100,maxHp:100}, false);
+    slotCtx.restore();
+  } finally {
+    ctx = gameCtx;
+  }
+}
+
 function _slotDef(slotIndex){
   if (slotIndex === 1) return { kind: 'axe', tier: (typeof _wepTier === 'function' && typeof _axeXP !== 'undefined') ? _wepTier(_axeXP) : 0 };
   if (slotIndex === 2) return { kind: 'sword', tier: (typeof _wepTier === 'function' && typeof _swordXP !== 'undefined') ? _wepTier(_swordXP) : 0 };
-  if (slotIndex === 3) return { type: 'wood', biome: 'forest' };
-  if (slotIndex === 4) return { type: 'stone', biome: 'forest' };
-  if (slotIndex === 5) return { type: 'apple' };
-  if (slotIndex === 6) return { type: 'gold' };
-  if (slotIndex === 7) return { type: 'bush' };
-  if (slotIndex === 8) return { type: 'rock' };
-  if (slotIndex === 9) return { type: 'crystal' };
-  if (slotIndex === 10) return { type: 'apple' };
+  if (slotIndex >= 3 && slotIndex <= 10) return { buildType: slotIndex };
   return null;
 }
 
@@ -17370,17 +17381,14 @@ function renderInventoryIcons(force){
       if (!slot) continue;
       var ctx = _IT[i];
       var def = _slotDef(i);
-      var key = def ? (def.kind ? 'k:' + def.kind + ':' + (def.tier || 0) : 'r:' + def.type + ':' + (def.biome || 'base')) : 'empty';
+      var key = def ? (def.kind ? 'k:' + def.kind + ':' + (def.tier || 0) : 'b:' + def.buildType) : 'empty';
       var redraw = force || key !== _lastInv[i];
       if (!redraw) continue;
       _lastInv[i] = key;
       if (def && def.kind) {
         _drawWeaponSlot(ctx, def.kind, def.tier);
-      } else if (def && def.type) {
-        var img = typeof _resourceSprite === 'function' ? _resourceSprite(def.type, def.biome) : null;
-        if (!img && def.type === 'wood') img = _resourceSprite('wood', 'forest');
-        if (!img && def.type === 'stone') img = _resourceSprite('stone', 'forest');
-        _drawSpriteToSlot(ctx, img);
+      } else if (def && def.buildType) {
+        _drawBuildingSlot(ctx, def.buildType);
       } else {
         _drawSlotBase(ctx);
       }
