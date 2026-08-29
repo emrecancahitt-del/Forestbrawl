@@ -11050,8 +11050,8 @@ function drawGroundDetailsDirect(c) {
     const _gridTile = document.createElement('canvas');
     _gridTile.width = GRID_SIZE; _gridTile.height = GRID_SIZE;
     const _gridTileCtx = _gridTile.getContext('2d');
-    _gridTileCtx.strokeStyle = 'rgba(0, 0, 0, 0.14)';
-    _gridTileCtx.lineWidth = 1.2;
+    _gridTileCtx.strokeStyle = 'rgba(0, 0, 0, 0.22)';
+    _gridTileCtx.lineWidth = 2;
     _gridTileCtx.beginPath();
     _gridTileCtx.moveTo(0, 0); _gridTileCtx.lineTo(GRID_SIZE, 0);
     _gridTileCtx.moveTo(0, 0); _gridTileCtx.lineTo(0, GRID_SIZE);
@@ -17360,8 +17360,9 @@ function _drawBuildingSlot(slotCtx, type){
   try {
     ctx = slotCtx;
     slotCtx.save();
+    slotCtx.translate(20, 20);
     slotCtx.scale(0.35, 0.35);
-    drawBuilding({x:40,y:40,type:type,tier:0,angle:0,shake:0,hp:100,maxHp:100}, false);
+    drawBuilding({x:0,y:0,type:type,tier:0,angle:0,shake:0,hp:100,maxHp:100}, false);
     slotCtx.restore();
   } finally {
     ctx = gameCtx;
