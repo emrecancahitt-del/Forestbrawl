@@ -15325,8 +15325,6 @@ setTimeout(_safeDismissLoading, 1200); // Safety fallback
 (function(){
   var W = window.innerWidth, H = window.innerHeight;
 
-  /* 1. Touch scroll tamamen engelle (capture phase) — envanter gibi kaydırılabilir
-        UI elementleri için izin ver */
   function _isScrollable(el) {
     while (el && el !== document.body) {
       var cls = el.className || '';
@@ -15337,18 +15335,15 @@ setTimeout(_safeDismissLoading, 1200); // Safety fallback
   }
   var opts = { passive:false, capture:true };
   document.addEventListener('touchmove', function(e){
-    if (_isScrollable(e.target)) return; // envanterde kaydırmaya izin ver
+    if (_isScrollable(e.target)) return;
     e.preventDefault();
   }, opts);
   document.addEventListener('touchstart', function(e){ if(e.touches.length>1) e.preventDefault(); }, opts);
   window.addEventListener('scroll', function(){ window.scrollTo(0,0); }, opts);
 
-  /* 2. RAF ile scroll pozisyonunu kilitle */
   if(window.scrollX||window.scrollY) window.scrollTo(0,0);
   window.scrollTo(0,0);
 
-  /* 3. Scroll sıfırla — canvas CSS inset:0/width:100%/height:100% ile sabit,
-        body boyutlandırması yapılmıyor (inset:0 ile çakışır ve gri boşluk çıkar) */
   function fixCanvas(){ window.scrollTo(0,0); }
   window.addEventListener('resize', fixCanvas);
   if(window.visualViewport){
@@ -15359,98 +15354,6 @@ setTimeout(_safeDismissLoading, 1200); // Safety fallback
     setTimeout(fixCanvas,100); setTimeout(fixCanvas,400); setTimeout(fixCanvas,900);
   });
   fixCanvas();
-
-  /* 4. NUCLEAR: Replit badge + enjekte elementleri tamamen kapat */
-  var _KEEP={gameCanvas:1,minimap:1,'kill-feed':1,'dmg-flash':1,'upgrade-overlay':1,'upg-backdrop':1,'upg-notify-btn':1,'death-overlay':1,'spawn-overlay':1,'top-hud':1,'bottom-hud':1,'joy-left':1,'joy-right':1,'inv-bar':1,'lb-panel':1,'ui-top':1,'ui-bottom':1,'toast':1,'boss-bar':1,'biome-indicator':1,'ping-display':1,'fps-display':1,'res-panel':1,'resource-hud':1,'build-upg-panel':1,'kill-flash':1,'kill-notif':1,'rage-overlay':1,'event-banner':1,'streak-hud':1,'shield-hud':1,'lvlup-flash':1,'tab-scoreboard':1,'quick-chat-wheel':1,'train-btn':1,'train-stop-hud':1,'loading-screen':1,'tutorial-overlay':1,'quest-panel':1,'ach-popup':1,'spectator-hud':1,'invite-hud-btn':1,'event-meteor-banner':1,'dash-btn':1,'snap-settings-panel':1,'clan-game-btn':1,'clan-game-panel':1};
-  function _nukeEl(el){
-    if(!el||el.nodeType!==1) return;
-    var t=el.tagName;
-    if (el.id === 'resource-hud' || (el.closest && el.closest('#resource-hud'))) return;
-    if (el.classList && (el.classList.contains('res-item') || el.classList.contains('res-icon') || el.classList.contains('res-value'))) return;
-    if (el.closest && el.closest('#resource-hud')) return;
-    if(t==='SCRIPT'||t==='STYLE'||t==='META'||t==='LINK'||t==='CANVAS'||t==='INPUT'||t==='TEXTAREA'||_KEEP[el.id]) return;
-    var s=el.style;
-    s.setProperty('display','none','important');s.setProperty('width','0','important');
-    s.setProperty('height','0','important');s.setProperty('max-width','0','important');
-    s.setProperty('max-height','0','important');s.setProperty('overflow','hidden','important');
-    s.setProperty('clip-path','inset(100%)','important');s.setProperty('pointer-events','none','important');
-    s.setProperty('visibility','hidden','important');s.setProperty('opacity','0','important');
-    s.setProperty('position','fixed','important');s.setProperty('top','0','important');s.setProperty('left','0','important');
-  }
-  function _restoreResourceHud(){
-    var hud = document.getElementById('resource-hud');
-    if (!hud) return;
-    function _restoreNode(node){
-      if (!node || !node.style) return;
-      node.style.setProperty('display','flex','important');
-      node.style.setProperty('visibility','visible','important');
-      node.style.setProperty('opacity','1','important');
-      node.style.setProperty('width','auto','important');
-      node.style.setProperty('height','auto','important');
-      node.style.setProperty('max-width','none','important');
-      node.style.setProperty('max-height','none','important');
-      node.style.setProperty('pointer-events','auto','important');
-      node.style.setProperty('overflow','visible','important');
-      node.style.setProperty('clip-path','none','important');
-      node.style.setProperty('position','fixed','important');
-      if (node.id === 'resource-hud') {
-        node.style.setProperty('left','10px','important');
-        node.style.setProperty('top','10px','important');
-        node.style.setProperty('transform','none','important');
-      }
-    }
-    _restoreNode(hud);
-    [].forEach.call(hud.querySelectorAll('.res-item, .res-icon, .res-value'), _restoreNode);
-    [].forEach.call(hud.querySelectorAll('.res-item,.res-icon,.res-value'), function(n){
-      n.style.setProperty('display', n.classList && n.classList.contains('res-value') ? 'inline-flex' : 'flex', 'important');
-      n.style.setProperty('visibility','visible','important');
-      n.style.setProperty('opacity','1','important');
-      n.style.setProperty('overflow','visible','important');
-      n.style.setProperty('clip-path','none','important');
-    });
-  }
-  function _sweepBadge(){
-    [].forEach.call(document.body.children, _nukeEl);
-    [].forEach.call(document.querySelectorAll('iframe'), function(f){
-      var s=f.style;s.setProperty('display','none','important');s.setProperty('width','0','important');
-      s.setProperty('height','0','important');s.setProperty('clip-path','inset(100%)','important');
-    });
-  }
-  _sweepBadge();
-  [100,500,1500,3500].forEach(function(t){ setTimeout(_sweepBadge,t); });
-  function _restoreResourceHud(){
-    var hud = document.getElementById('resource-hud');
-    if (!hud) return;
-    hud.style.setProperty('display','flex','important');
-    hud.style.setProperty('visibility','visible','important');
-    hud.style.setProperty('opacity','1','important');
-    hud.style.setProperty('width','auto','important');
-    hud.style.setProperty('height','auto','important');
-    hud.style.setProperty('max-width','none','important');
-    hud.style.setProperty('max-height','none','important');
-    hud.style.setProperty('pointer-events','auto','important');
-    hud.style.setProperty('left','10px','important');
-    hud.style.setProperty('top','10px','important');
-    hud.style.setProperty('transform','none','important');
-  }
-  _restoreResourceHud();
-  [120,320,800,1600,2600,4200,6000].forEach(function(t){ setTimeout(_restoreResourceHud,t); });
-  window.addEventListener('load', _restoreResourceHud, { once: true });
-  if (window.__forestHudRestoreTimer) clearInterval(window.__forestHudRestoreTimer);
-  window.__forestHudRestoreTimer = setInterval(function(){
-    if (document.getElementById('resource-hud')) _restoreResourceHud();
-  }, 250);
-  var _hudObserver = new MutationObserver(function(muts){
-    if (!document.getElementById('resource-hud')) return;
-    _restoreResourceHud();
-    muts.forEach(function(m){
-      for (var i = 0; i < (m.addedNodes || []).length; i++) {
-        _nukeEl(m.addedNodes[i]);
-      }
-    });
-    _restoreResourceHud();
-  });
-  _hudObserver.observe(document.body,{childList:true,subtree:true});
 })();
 
 // =====================================================================
