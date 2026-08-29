@@ -127,12 +127,12 @@ body>iframe[style]{
 .res-row{
   display:flex;align-items:center;gap:5px;
   border-radius:10px;padding:5px 10px 5px 8px;
-  transition:transform 0.1s;
+  transition:none;
   background:rgba(0,0,0,0.6);
   border:1.5px solid rgba(255,255,255,0.12);
 }
-.res-row:hover{transform:scale(1.05);}
-.res-emoji{font-size:16px;line-height:1;flex-shrink:0;}
+.res-row:hover{background:rgba(0,0,0,0.7);}
+.res-icon{width:27px;height:27px;object-fit:contain;display:block;flex-shrink:0;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.75));}
 .res-info{display:flex;flex-direction:column;gap:0px;}
 .res-label{display:none;}
 .res-count{color:#fff;font-size:14px;font-weight:900;line-height:1.1;}
@@ -435,7 +435,7 @@ body>iframe[style]{
     max-width:160px;
   }
   .res-row{padding:3px 7px;border-radius:8px;}
-  .res-emoji{font-size:13px;}
+  .res-icon{width:22px;height:22px;}
   .res-count{font-size:11px;}
   .res-label{display:none;}
 
@@ -524,7 +524,7 @@ body>iframe[style]{
   /* Resources panel: smaller */
   .res-row{padding:4px 8px;}
   .res-count{font-size:12px;}
-  .res-emoji{font-size:14px;}
+  .res-icon{width:24px;height:24px;}
 }
 
 /* ===== VERY NARROW PORTRAIT (≤380px) ===== */
@@ -1498,19 +1498,19 @@ function drawSkinEyesOverlay(c, R, sk, fl) {
 <!-- RESOURCES PANEL — fixed right side -->
 <div id="res-panel">
   <div class="res-row" id="apple-btn" title="Q — Elma ye">
-    <span class="res-emoji">🍎</span>
+    <img class="res-icon" src="asset/apple.png" alt="Elma">
     <div class="res-info"><span class="res-label">Elma</span><span class="res-count" id="apple-count">10</span></div>
   </div>
   <div class="res-row res-wood">
-    <span class="res-emoji">🪵</span>
+    <img class="res-icon" src="asset/tree-forest.png" alt="Odun">
     <div class="res-info"><span class="res-label">Odun</span><span class="res-count" id="wood-count">0</span></div>
   </div>
   <div class="res-row res-stone">
-    <span class="res-emoji">🪨</span>
+    <img class="res-icon" src="asset/rock-forest.png" alt="Taş">
     <div class="res-info"><span class="res-label">Taş</span><span class="res-count" id="stone-count">0</span></div>
   </div>
   <div class="res-row res-gold">
-    <span class="res-emoji">💰</span>
+    <img class="res-icon" src="asset/gold.png" alt="Altın">
     <div class="res-info"><span class="res-label">Altın</span><span class="res-count" id="gold-count">0</span></div>
   </div>
   <div class="res-row res-score">
